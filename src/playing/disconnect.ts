@@ -15,7 +15,7 @@ const disconnect = async (socket: Socket) => {
         }
         const findInTable = await Table.findOne({ "playerInfo.socketId": socket.id })
         if (findInTable) {
-            if (findInTable.gameStatus != 'Winner') {
+            if (findInTable.gameStatus != 'Winner' && findInTable.gameStatus != 'Tie') {
                 const updateTable = await Table.findByIdAndUpdate({ _id: findInTable._id }, {
                     $pull: { playerInfo: { socketId: socket.id } },
                     $inc: { activePlayer: -1 }

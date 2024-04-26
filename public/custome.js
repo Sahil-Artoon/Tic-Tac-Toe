@@ -176,9 +176,27 @@ const printValue = (data) => {
         document.getElementById(data.cellId).innerHTML = data.symbol
         document.getElementById(data.cellId).classList.add("disabled");
         disableBoard('Aponent Turn.')
-        let checkWinnerOrNot = checkWinner()
-        if (checkWinnerOrNot != 0) {
-            return sendEmmiter(checkWinnerOrNot);
+        if (data.winner == true) {
+            data = {
+                eventName: 'WINNER',
+                data: {
+                    tableId,
+                    userId,
+                    symbol: data.symbol
+                }
+            }
+            return sendEmmiter(data);
+        }
+        if (data.winner == "TIE") {
+            data = {
+                eventName: 'WINNER',
+                data: {
+                    tableId,
+                    userId,
+                    symbol: "TIE"
+                }
+            }
+            return sendEmmiter(data);
         }
         if (data.symbol != symbol) {
             enableBoard()
