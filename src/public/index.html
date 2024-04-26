@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Welcome! Please enter your username</h1>
+            <form id="join-table-form">
+                <input type="text" placeholder="Enter your username" id="userName" required autocomplete="off">
+                <br><br>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+        <div class="play-btn">
+            <a id="play-video" class="video-play-button">
+                <span id="play-video-span"></span>
+              </a>
+        </div>
+        <div id="all-game">
+            <div class="heading">
+                <h1>Tic Tac Toe</h1>
+                <h1 id="currentUserName"></h1>
+            </div>
+            <div class="board-pera">
+                <div class="board">
+                    <div class="board-row">
+                        <div class="cell" id="cell-1" onclick="sendIdToSocket('cell-1')"></div>
+                        <div class="cell" id="cell-2" onclick="sendIdToSocket('cell-2')"></div>
+                        <div class="cell" id="cell-3" onclick="sendIdToSocket('cell-3')"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="cell" id="cell-4" onclick="sendIdToSocket('cell-4')"></div>
+                        <div class="cell" id="cell-5" onclick="sendIdToSocket('cell-5')"></div>
+                        <div class="cell" id="cell-6" onclick="sendIdToSocket('cell-6')"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="cell" id="cell-7" onclick="sendIdToSocket('cell-7')"></div>
+                        <div class="cell" id="cell-8" onclick="sendIdToSocket('cell-8')"></div>
+                        <div class="cell" id="cell-9" onclick="sendIdToSocket('cell-9')"></div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h1 id="winner"></h1>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="custome.js"></script>
+</body>
+
+</html>
