@@ -10,9 +10,6 @@ const winner = async (data: any, socket: Socket) => {
         if (data.symbol == "TIE") {
             let tableId = data.tableId
             let gameStatusUpdate = await Table.findByIdAndUpdate(data.tableId, { gameStatus: "Tie" })
-            if (gameStatusUpdate) {
-                logger.error("Game status update")
-            }
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {
@@ -30,9 +27,6 @@ const winner = async (data: any, socket: Socket) => {
         if (data.symbol == "O" || data.symbol == "X") {
             let tableId = data.tableId
             let gameStatusUpdate = await Table.findByIdAndUpdate(data.tableId, { gameStatus: "Winner" })
-            if (gameStatusUpdate) {
-                logger.error("Game status update")
-            }
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {

@@ -2,7 +2,7 @@
 body {
   font-family: Arial, sans-serif;
   /* background: linear-gradient(to right, #7f7fd5, #86a8e7, #91eae4); */
-  background: linear-gradient(to right, #c0c0aa, #1cefff);
+  background: linear-gradient(to left, #c0c0aa, #1cefff);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -126,7 +126,7 @@ input[type="submit"]:hover {
 .disabled {
   pointer-events: none;
   /* Disable pointer events */
-  opacity: 0.7;
+  opacity: 0.5;
   /* Optionally reduce opacity to indicate it's disabled */
 }
 
