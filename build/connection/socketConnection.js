@@ -10,17 +10,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.socketConnection = void 0;
-const eventHamdler_js_1 = require("../eventHandler/eventHamdler.js");
-const index_js_1 = require("../index.js");
-const logger_js_1 = require("../logger/logger.js");
+const eventHandler_1 = require("../eventHandler");
+const index_1 = require("../index");
+const logger_1 = require("../logger");
+const disconnect_1 = require("../playing/disconnect");
 const socketConnection = () => {
     try {
-        index_js_1.io.on('connection', (socket) => __awaiter(void 0, void 0, void 0, function* () {
-            yield (0, eventHamdler_js_1.eventHandler)(socket);
+        index_1.io.on('connection', (socket) => __awaiter(void 0, void 0, void 0, function* () {
+            logger_1.logger.info(`SocketId is:::: ${socket.id}`);
+            yield (0, eventHandler_1.eventHandler)(socket);
+            socket.on("disconnect", () => {
+                (0, disconnect_1.disconnect)(socket);
+            });
         }));
     }
     catch (error) {
-        logger_js_1.logger.error("error of socket connection :::", error);
+        logger_1.logger.error("error of socket connection :::", error);
     }
 };
 exports.socketConnection = socketConnection;

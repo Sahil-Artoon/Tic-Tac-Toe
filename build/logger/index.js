@@ -8,8 +8,8 @@ const logger = (0, winston_1.createLogger)({
     format: combine(colorize({ all: true }), timestamp({ format: "YYYY-MM-DD HH:mm:ss:SSS" }), prettyPrint(), printf((info) => {
         return `${[info.timestamp]} : ${[info.level]} : ${info.message}`;
     })),
-    defaultMeta: { service: 'user-service' },
     transports: [
+        new winston_1.transports.Console(),
         new winston_1.transports.File({
             filename: 'error.log',
             level: 'error',

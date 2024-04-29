@@ -28,8 +28,8 @@ const joinGame = async (data: any, socket: Socket) => {
                     }
                 },
                 activePlayer: 2,
-                gameStatus:"waiting"
-            })
+                gameStatus: "WATING"
+            }, { new: true })
 
             if (updateTable) {
                 const newTable = await Table.findById(updateTable._id)
@@ -39,23 +39,23 @@ const joinGame = async (data: any, socket: Socket) => {
                         data: {
                             data: newTable.playerInfo[1],
                             message: "ok",
-                            status: "Start"
+                            status: "waiting"
                         },
                         socket
                     }
                     sendToSocketIdEmmiter(data)
                 }
-                let gameStatusUpdate = await Table.updateOne({ _id: updateTable._id }, { gameStatus: "Round timer Start" })
+                let gameStatusUpdate = await Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" })
                 const currentTable = await Table.findById(updateTable._id)
                 if (currentTable) {
                     socket.join(currentTable._id.toString())
                     data = {
-                        eventName: EVENT_NAME.START_GAME,
+                        eventName: EVENT_NAME.ROUND_TIMER,
                         data: {
                             _id: currentTable._id.toString(),
                             data: currentTable,
                             message: "ok",
-
+                            roundTimer: 10
                         },
                         socket
                     }
@@ -83,7 +83,9 @@ const joinGame = async (data: any, socket: Socket) => {
                     { userId: "", symbol: "" },
                 ],
                 activePlayer: 1,
-                gameStatus:"waiting"
+                gameStatus: "WATING",
+                currentTurnSeatIndex: "",
+                currentTurnUserId: ""
             })
             if (generateTable) {
                 data = {

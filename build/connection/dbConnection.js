@@ -8,17 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eventHandler = void 0;
-const logger_1 = require("../logger/logger");
-const eventHandler = (socket) => __awaiter(void 0, void 0, void 0, function* () {
+exports.connectDb = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
+const logger_1 = require("../logger");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config({ path: './env' });
+const connectDb = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        socket.onAny((eventName, data) => {
-            logger_1.logger.info(`Request Event Name is : ${eventName} : Request Data : ${JSON.stringify(data)}`);
-        });
+        yield mongoose_1.default.connect(`${process.env.MONGODB_URI}${process.env.MONGODB_DATABASE_NAME}`);
+        logger_1.logger.info(`connect DB successFully !!!`);
     }
     catch (error) {
-        logger_1.logger.error("eventHandler ::::::::::", error);
+        logger_1.logger.error("MongoDB connection Error", error);
     }
 });
-exports.eventHandler = eventHandler;
+exports.connectDb = connectDb;

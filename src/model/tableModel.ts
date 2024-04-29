@@ -41,6 +41,12 @@ const tableSchema = new mongoose.Schema({
     },
     gameStatus: {
         type: String
+    },
+    currentTurnSeatIndex: {
+        type: String
+    },
+    currentTurnUserId: {
+        type: String
     }
 }, { timestamps: true })
 
