@@ -176,6 +176,14 @@ const printValue = (data) => {
 }
 const changeTurn = (data) => {
     console.log(`EventName IS:::${data.eventName} and Data is :::${JSON.stringify(data.data)}`)
+    if (data.data.symbol == symbol){
+        enableBoard()
+        document.getElementById('winner').innerHTML = "It's your Turn.";
+    }
+    if(data.data.symbol != symbol){
+        disableBoard('Aponent Turn.')
+        // document.getElementById('winner').innerHTML = "Aponent Turn.";
+    }
 }
 const declareWinner = (data) => {
     console.log(`EventName IS:::${data.eventName} and Data is :::${JSON.stringify(data.data)}`)
