@@ -99,19 +99,6 @@ const roundTimer = (data) => {
             if (seconds < 0) {
                 timerElement.textContent = "Waiting"
                 clearInterval(timerInterval);
-                if (symbol == "X") {
-                    data = {
-                        eventName: 'CHECK_TURN',
-                        data: {
-                            data: {
-                                symbol: symbol,
-                                userId: userId,
-                                tableId: data.data._id
-                            }
-                        }
-                    }
-                    sendEmmiter(data)
-                }
             }
         }
         // Call updateTimer function every second
@@ -128,7 +115,6 @@ const checkTurn = (data) => {
         }
         if (data.symbol != symbol) {
             disableBoard('Aponent Turn.')
-            // document.getElementById('winner').innerHTML = "Aponent Turn.";
         }
     }
 }
@@ -138,61 +124,28 @@ const printValue = (data) => {
     if (data.message == "ok") {
         document.getElementById(data.cellId).innerHTML = data.symbol
         document.getElementById(data.cellId).classList.add("disabled");
-        // disableBoard('Aponent Turn.')
-        if (data.winner == true) {
-            data = {
-                eventName: 'WINNER',
-                data: {
-                    tableId,
-                    userId,
-                    symbol: data.symbol
-                }
-            }
-            return sendEmmiter(data);
-        }
-        if (data.winner == "TIE") {
-            data = {
-                eventName: 'WINNER',
-                data: {
-                    tableId,
-                    userId,
-                    symbol: "TIE"
-                }
-            }
-            return sendEmmiter(data);
-        }
-        if (data.symbol != symbol) {
-            data = {
-                eventName: 'CHANGE_TURN',
-                data: {
-                    tableId,
-                    userId,
-                    symbol
-                }
-            }
-            sendEmmiter(data)
-        }
     }
 }
 const changeTurn = (data) => {
-    console.log(`EventName IS:::${data.eventName} and Data is :::${JSON.stringify(data.data)}`)
-    if (data.data.symbol == symbol){
+    console.log(`Data of changeTurn is :::${JSON.stringify(data)}`)
+    if (data.data.symbol == symbol) {
         enableBoard()
         document.getElementById('winner').innerHTML = "It's your Turn.";
     }
-    if(data.data.symbol != symbol){
+    if (data.data.symbol != symbol) {
         disableBoard('Aponent Turn.')
-        // document.getElementById('winner').innerHTML = "Aponent Turn.";
     }
 }
 const declareWinner = (data) => {
-    console.log(`EventName IS:::${data.eventName} and Data is :::${JSON.stringify(data.data)}`)
+    console.log(`Data of DeclareWinner is :::${JSON.stringify(data)}`)
     if (data.message == "Winner") {
         if (data.symbol == symbol) {
             document.getElementById('winner').innerHTML = `${userName} You Win`;
+            document.querySelector(".board").classList.add("disabled");
         }
         if (data.symbol != symbol) {
             document.getElementById('winner').innerHTML = `${userName} You Lose`;
+            document.querySelector(".board").classList.add("disabled");
         }
         setTimeout(() => {
             window.location.reload();
@@ -200,6 +153,7 @@ const declareWinner = (data) => {
     }
     if (data.message == "TIE") {
         document.getElementById('winner').innerHTML = "IT'S TIE";
+        document.querySelector(".board").classList.add("disabled");
         setTimeout(() => {
             window.location.reload();
         }, 5000)

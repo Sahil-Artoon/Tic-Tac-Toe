@@ -5,6 +5,8 @@ import { User } from "../model/userModel"
 import { EVENT_NAME } from "../constant/eventName"
 import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter"
 import { set } from "mongoose"
+import { changeTurn } from "./changeTurn"
+import { checkTurn } from "./checkTurn"
 
 const joinGame = async (data: any, socket: Socket) => {
     try {
@@ -45,7 +47,7 @@ const joinGame = async (data: any, socket: Socket) => {
                     }
                     sendToSocketIdEmmiter(data)
                 }
-                let gameStatusUpdate = await Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" })
+                await Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" })
                 const currentTable = await Table.findById(updateTable._id)
                 if (currentTable) {
                     socket.join(currentTable._id.toString())
@@ -60,6 +62,12 @@ const joinGame = async (data: any, socket: Socket) => {
                         socket
                     }
                     sendToRoomEmmiter(data)
+
+                    await setTimeout(() => {
+                        checkTurn({
+                            tableId: updateTable._id
+                        })
+                    }, 11000);
                 }
             }
         } else {

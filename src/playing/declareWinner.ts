@@ -1,44 +1,42 @@
-import { Socket } from "socket.io";
 import { logger } from "../logger";
 import { EVENT_NAME } from "../constant/eventName";
 import { sendToRoomEmmiter } from "../eventEmmitter";
 import { Table } from "../model/tableModel";
 
-const winner = async (data: any, socket: Socket) => {
+const declareWinner = async (data: any) => {
     try {
-        logger.info(`Data is ::: ${JSON.stringify(data)} and socket is ::: ${socket.id}`)
+        logger.info(`Data is ::: ${JSON.stringify(data)}`)
+        console.log("Declare Winner Data", data)
         if (data.symbol == "TIE") {
             let tableId = data.tableId
-            let gameStatusUpdate = await Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE" })
+            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE" })
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {
-                    _id: data.tableId,
+                    _id: data.tableId.toString(),
                     message: "TIE",
                     symbol: data.symbol
-                },
-                socket
+                }
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, 60000)
+            }, 30000)
             return sendToRoomEmmiter(data)
         }
         if (data.symbol == "O" || data.symbol == "X") {
             let tableId = data.tableId
-            let gameStatusUpdate = await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER" })
+            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER" })
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {
-                    _id: data.tableId,
+                    _id: data.tableId.toString(),
                     message: "Winner",
                     symbol: data.symbol
                 },
-                socket
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, 60000)
+            }, 30000)
             return sendToRoomEmmiter(data)
         }
     } catch (error) {
@@ -57,4 +55,4 @@ const deleteTable = async (tableId: String) => {
     }
 }
 
-export { winner }
+export { declareWinner }

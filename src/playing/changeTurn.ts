@@ -1,12 +1,12 @@
-import { Socket } from "socket.io";
 import { logger } from "../logger";
 import { Table } from "../model/tableModel";
 import { EVENT_NAME } from "../constant/eventName";
 import { sendToRoomEmmiter } from "../eventEmmitter";
 
-const changeTurn = async (data: any, socket: Socket) => {
+const changeTurn = async (data: any) => {
     try {
-        logger.info(`changeTurn:::Data: ${JSON.stringify(data)} and Socket Id::: ${socket.id}`);
+        logger.info(`changeTurn:::Data: ${JSON.stringify(data)}`);
+        console.log("Change Turn Data Is:::",data)
         // {"tableId":"662f7557b813436b36222971","userId":"662f{"tableId":"666b7a66976c3419de4a85"} and Socket Id::: 
         // oNs_l6DzrGbCde4a85"} and S2f7557b813436b36222971","userId":Xt31AAAH
         let findTable = await Table.findById(data.tableId)
@@ -19,7 +19,7 @@ const changeTurn = async (data: any, socket: Socket) => {
                 data = {
                     eventName: EVENT_NAME.CHANGE_TURN,
                     data: {
-                        _id:data.tableId,
+                        _id: updateTable?._id.toString(),
                         data: updateTable?.playerInfo[1],
                         userId: updateTable?.playerInfo[1].userId,
                         symbol: updateTable?.playerInfo[1].symbol
@@ -35,7 +35,7 @@ const changeTurn = async (data: any, socket: Socket) => {
                 data = {
                     eventName: EVENT_NAME.CHANGE_TURN,
                     data: {
-                        _id:data.tableId,
+                        _id: updateTable?._id.toString(),
                         data: updateTable?.playerInfo[0],
                         userId: updateTable?.playerInfo[0].userId,
                         symbol: updateTable?.playerInfo[0].symbol

@@ -4,9 +4,6 @@ import { EVENT_NAME } from "../constant/eventName";
 import { signUp } from "../playing/signUpUser";
 import { joinGame } from "../playing/joinGame";
 import { playGame } from "../playing/playGame";
-import { winner } from "../playing/winner";
-import { checkTurn } from "../playing/checkTurn";
-import { changeTurn } from "../playing/changeTurn";
 
 const eventHandler = async (socket: Socket) => {
     try {
@@ -21,15 +18,6 @@ const eventHandler = async (socket: Socket) => {
                     break;
                 case EVENT_NAME.PLAY_GAME:
                     playGame(data, socket)
-                    break;
-                case EVENT_NAME.CHANGE_TURN:
-                    changeTurn(data, socket)
-                    break;
-                case EVENT_NAME.CHECK_TURN:
-                    checkTurn(data, socket)
-                    break;
-                case EVENT_NAME.WINNER:
-                    winner(data, socket)
                     break;
             }
         })
