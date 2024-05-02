@@ -13,16 +13,16 @@ const disconnect = async (socket: Socket) => {
             )
             logger.info("Update SocketId successfully At Disconnect Time !!!")
         }
-        const findInTable = await Table.findOne({ "playerInfo.socketId": socket.id })
-        if (findInTable) {
-            if (findInTable.gameStatus != 'WINNER' && findInTable.gameStatus != 'TIE') {
-                const updateTable = await Table.findByIdAndUpdate({ _id: findInTable._id }, {
-                    $pull: { playerInfo: { socketId: socket.id } },
-                    $inc: { activePlayer: -1 }
-                })
-                logger.info("Update Table successfully At Disconnect Time");
-            }
-        }
+        // const findInTable = await Table.findOne({ "playerInfo.socketId": socket.id })
+        // if (findInTable) {
+        //     if (findInTable.gameStatus != 'WINNER' && findInTable.gameStatus != 'TIE') {
+        //         const updateTable = await Table.findByIdAndUpdate({ _id: findInTable._id }, {
+        //             $pull: { playerInfo: { socketId: socket.id } },
+        //             $inc: { activePlayer: -1 }
+        //         })
+        //         logger.info("Update Table successfully At Disconnect Time");
+        //     }
+        // }
         const checkTable = await Table.find({ activePlayer: 0 })
         if (checkTable) {
             checkTable.map(async (item) => {

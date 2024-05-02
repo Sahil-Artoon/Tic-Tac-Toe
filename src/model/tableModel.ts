@@ -10,10 +10,6 @@ const tableSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        socketId: {
-            type: String,
-            required: true
-        },
         isActive: {
             type: Boolean,
             default: false

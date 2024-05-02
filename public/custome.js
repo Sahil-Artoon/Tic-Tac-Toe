@@ -7,6 +7,8 @@ var symbol;
 var userName;
 var tableId;
 
+const currentUser = getSession("CurrentUser")
+
 // Sign-up Event
 document.getElementById('join-table-form').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -60,7 +62,21 @@ function enableBoard() {
     // document.querySelector('#winner').innerHTML = 'Waiting for Opponent'
 }
 
-// All any Function ::::::::::::::::::::
+
+// :::::::::::::: Session Functions ::::::::::::::
+function setSession(key, value) {
+    sessionStorage.setItem(key, JSON.stringify(value));
+}
+
+// Function to get session storage value
+function getSession(key) {
+    const value = sessionStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+}
+// ::::::::::::::::::::::::::::::::::::::::::::
+
+// :::::::::::::: Socket.on All Functions :::::::::::::::
+
 const signUpGame = (data) => {
     if (data.message == "ok") {
         userId = data.data._id
@@ -73,12 +89,32 @@ const signUpGame = (data) => {
 
 const joinGame = (data) => {
     if (data.message == "ok") {
-        // console.log("JoinGame Data:::", data.data)
-        if (data.data.symbol == 'X') {
-            symbol = 'X'
+        console.log("JoinGame Data:::", data)
+        if (data.data.playerInfo.length == 1) {
+            if (data.data.playerInfo[0].symbol == 'X') {
+                symbol = 'X'
+            }
+            if (data.data.playerInfo[0].symbol == 'O') {
+                symbol = 'O'
+            }
+            dataOfSession = {
+                tableId: data.data._id,
+                userData: data.data.playerInfo[0]
+            }
+            setSession("CurrentUser", dataOfSession)
         }
-        if (data.data.symbol == 'O') {
-            symbol = 'O'
+        if (data.data.playerInfo.length == 2) {
+            if (data.data.playerInfo[1].symbol == 'X') {
+                symbol = 'X'
+            }
+            if (data.data.playerInfo[1].symbol == 'O') {
+                symbol = 'O'
+            }
+            data = {
+                tableId: data.data._id,
+                userData: data.data.playerInfo[1]
+            }
+            setSession("CurrentUser", data)
         }
         document.querySelector('.play-btn').style.display = 'none';
         document.querySelector('#all-game').style.display = 'block';
@@ -160,6 +196,28 @@ const declareWinner = (data) => {
     }
 }
 
+const reJoinGame = (data) => {
+    console.log("EvenetName is Rejoin :::::", JSON.stringify(data));
+    if (data.gameStatus == "WATING") {
+        symbol = data.data.userData.symbol;
+        userId = data.data.userData.userId;
+        userName = data.data.userData.userName;
+        document.querySelector('.form-container').style.display = 'none'
+        document.querySelector('#all-game').style.display = 'block';
+        document.querySelector('#currentUserName').innerHTML = userName
+        disableBoard('Waiting');
+    }
+    if (data.gameStatus == "ROUND_TIMER") {
+        symbol = data.data.userData.symbol;
+        userId = data.data.userData.userId;
+        userName = data.data.userData.userName;
+        document.querySelector('.form-container').style.display = 'none'
+        document.querySelector('#all-game').style.display = 'block';
+        document.querySelector('#currentUserName').innerHTML = userName
+        disableBoard('Waiting');
+    }
+}
+
 const sendEmmiter = (data) => {
     console.log(`EventName IS:::${data.eventName} and Data is ${JSON.stringify(data.data)}`)
     socket.emit(data.eventName, data.data)
@@ -189,7 +247,23 @@ socket.onAny((eventName, data) => {
         case "WINNER":
             declareWinner(data)
             break;
+        case "REJOIN_GAME":
+            reJoinGame(data)
+            break;
         default:
             break;
     }
 })
+
+
+if (currentUser) {
+    console.log("CurrentUser is ::::::::::::::::: ", currentUser)
+    data = {
+        eventName: 'REJOIN_GAME',
+        data: {
+            tableId: currentUser.tableId,
+            userData: currentUser.userData
+        }
+    }
+    sendEmmiter(data)
+}

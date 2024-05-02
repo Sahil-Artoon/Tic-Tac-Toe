@@ -4,6 +4,7 @@ import { EVENT_NAME } from "../constant/eventName";
 import { signUp } from "../playing/signUpUser";
 import { joinGame } from "../playing/joinGame";
 import { playGame } from "../playing/playGame";
+import { reJoinGame } from "../playing/reJoinGame";
 
 const eventHandler = async (socket: Socket) => {
     try {
@@ -18,6 +19,9 @@ const eventHandler = async (socket: Socket) => {
                     break;
                 case EVENT_NAME.PLAY_GAME:
                     playGame(data, socket)
+                    break;
+                case EVENT_NAME.REJOIN_GAME:
+                    reJoinGame(data, socket)
                     break;
             }
         })

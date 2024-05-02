@@ -39,7 +39,7 @@ const joinGame = async (data: any, socket: Socket) => {
                     data = {
                         eventName: EVENT_NAME.JOIN_TABLE,
                         data: {
-                            data: newTable.playerInfo[1],
+                            data: newTable,
                             message: "ok",
                             status: "waiting"
                         },
@@ -99,7 +99,7 @@ const joinGame = async (data: any, socket: Socket) => {
                 data = {
                     eventName: EVENT_NAME.JOIN_TABLE,
                     data: {
-                        data: generateTable.playerInfo[0],
+                        data: generateTable,
                         message: "ok",
                         status: "Waiting"
                     },
