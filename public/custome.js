@@ -128,7 +128,7 @@ const roundTimer = (data) => {
         tableId = data.data._id;
         // Start the timer
         const timerElement = document.getElementById('winner');
-        let seconds = 10;
+        let seconds = data.roundTimer;
         function updateTimer() {
             timerElement.textContent = `Game Start in ${seconds}`;
             seconds--;
@@ -185,19 +185,19 @@ const declareWinner = (data) => {
         }
         setTimeout(() => {
             window.location.reload();
-        }, 5000)
+        }, 10000)
     }
     if (data.message == "TIE") {
         document.getElementById('winner').innerHTML = "IT'S TIE";
         document.querySelector(".board").classList.add("disabled");
         setTimeout(() => {
             window.location.reload();
-        }, 5000)
+        }, 10000)
     }
 }
 
 const reJoinGame = (data) => {
-    console.log("EvenetName is Rejoin :::::", JSON.stringify(data));
+    console.log("EvenetName is Rejoin :::::", data);
     if (data.gameStatus == "WATING") {
         symbol = data.data.userData.symbol;
         userId = data.data.userData.userId;
@@ -207,15 +207,80 @@ const reJoinGame = (data) => {
         document.querySelector('#currentUserName').innerHTML = userName
         disableBoard('Waiting');
     }
-    if (data.gameStatus == "ROUND_TIMER") {
+    if (data.gameStatus == "ROUND_TIMER_START") {
         symbol = data.data.userData.symbol;
         userId = data.data.userData.userId;
         userName = data.data.userData.userName;
+        tableId = data.data.tableId;
         document.querySelector('.form-container').style.display = 'none'
         document.querySelector('#all-game').style.display = 'block';
         document.querySelector('#currentUserName').innerHTML = userName
         disableBoard('Waiting');
     }
+    if (data.gameStatus == "CHECK_TURN") {
+        symbol = data.data.userData.symbol;
+        userId = data.data.userData.userId;
+        userName = data.data.userData.userName;
+        tableId = data.data.tableId;
+        if (data.tableData.currentTurnUserId == userId) {
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            enableBoard()
+            document.getElementById('winner').innerHTML = "It's your Turn.";
+        }
+        if (data.tableData.currentTurnUserId != userId) {
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            disableBoard('Aponent Turn.')
+        }
+    }
+    if (data.gameStatus == "PLAYING") {
+        symbol = data.data.userData.symbol;
+        userId = data.data.userData.userId;
+        userName = data.data.userData.userName;
+        tableId = data.data.tableId;
+        if (data.tableData.currentTurnUserId == userId) {
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            enableBoard()
+            document.getElementById('winner').innerHTML = "It's your Turn.";
+        }
+        if (data.tableData.currentTurnUserId != userId) {
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            disableBoard('Aponent Turn.')
+        }
+        for (let i = 0; i < data.tableData.playingData.length; i++) {
+            PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
+        }
+    }
+    if (data.gameStatus == "WINNER" || data.gameStatus == "TIE") {
+        symbol = data.data.userData.symbol;
+        userId = data.data.userData.userId;
+        userName = data.data.userData.userName;
+        tableId = data.data.tableId;
+        document.querySelector('.form-container').style.display = 'none'
+        document.querySelector('#all-game').style.display = 'block';
+        document.querySelector(".board").classList.add("disabled");
+        for (let i = 0; i < data.tableData.playingData.length; i++) {
+            PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
+        }
+        if (data.gameStatus == "WINNER") {
+            if (data.tableData.winnerUserId == userId) {
+                document.getElementById('winner').innerHTML = `${userName} You Win`;
+            }
+            if (data.tableData.winnerUserId != userId) {
+                document.getElementById('winner').innerHTML = `${userName} You Lose`;
+            }
+        }
+        if (data.gameStatus == "TIE") {
+            document.getElementById('winner').innerHTML = `It's TIE`;
+        }
+    }
+}
+
+const PrintTableDataAtRejoinTime = (data, index) => {
+    document.getElementById(`cell-${index + 1}`).textContent = data.symbol
 }
 
 const sendEmmiter = (data) => {

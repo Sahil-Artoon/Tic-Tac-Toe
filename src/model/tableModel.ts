@@ -43,6 +43,9 @@ const tableSchema = new mongoose.Schema({
     },
     currentTurnUserId: {
         type: String
+    },
+    winnerUserId:{
+        type:String
     }
 }, { timestamps: true })
 

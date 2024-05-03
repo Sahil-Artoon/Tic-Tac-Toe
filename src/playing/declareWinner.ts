@@ -5,11 +5,11 @@ import { Table } from "../model/tableModel";
 
 const declareWinner = async (data: any) => {
     try {
-        logger.info(`Data is ::: ${JSON.stringify(data)}`)
+        logger.info(`Data is Winner::::::: ${JSON.stringify(data)}`)
         console.log("Declare Winner Data", data)
         if (data.symbol == "TIE") {
             let tableId = data.tableId
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE" })
+            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE", winnerUserId: data.userId })
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {
@@ -20,12 +20,12 @@ const declareWinner = async (data: any) => {
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, 30000)
+            }, 60000)
             return sendToRoomEmmiter(data)
         }
         if (data.symbol == "O" || data.symbol == "X") {
             let tableId = data.tableId
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER" })
+            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER", winnerUserId: data.userId })
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {
@@ -36,7 +36,7 @@ const declareWinner = async (data: any) => {
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, 30000)
+            }, 60000)
             return sendToRoomEmmiter(data)
         }
     } catch (error) {

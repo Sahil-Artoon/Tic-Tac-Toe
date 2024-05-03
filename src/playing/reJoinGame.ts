@@ -2,8 +2,9 @@ import { Socket } from "socket.io";
 import { logger } from "../logger";
 import { Table } from "../model/tableModel";
 import { User } from "../model/userModel";
-import { sendToSocketIdEmmiter } from "../eventEmmitter";
+import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter";
 import { EVENT_NAME } from "../constant/eventName";
+import { eventHandler } from "../eventHandler";
 
 const reJoinGame = async (data: any, socket: Socket) => {
     try {
@@ -35,11 +36,9 @@ const reJoinGame = async (data: any, socket: Socket) => {
             if (findTable.playerInfo.length == 2) {
                 if (findTable.playerInfo[0].userId == data.userData.userId) {
                     await User.findByIdAndUpdate(findTable.playerInfo[0].userId, { socketId: socket.id })
-                    await Table.findByIdAndUpdate(findTable._id, { $set: { 'playerInfo[0].socketId': socket.id } })
                 }
                 if (findTable.playerInfo[1].userId == data.userData.userId) {
                     await User.findByIdAndUpdate(findTable.playerInfo[1].userId, { socketId: socket.id })
-                    await Table.findByIdAndUpdate(findTable._id, { $set: { 'playerInfo[1].socketId': socket.id } })
                 }
                 socket.join(findTable._id.toString())
                 if (findTable.gameStatus == "WATING") {
@@ -55,10 +54,47 @@ const reJoinGame = async (data: any, socket: Socket) => {
                 }
                 if (findTable.gameStatus == "ROUND_TIMER_START") {
                     data = {
-                        eventName: EVENT_NAME.ROUND_TIMER,
+                        eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
                             gameStatus: findTable.gameStatus,
                             data
+                        },
+                        socket
+                    }
+                    return sendToSocketIdEmmiter(data)
+                }
+                if (findTable.gameStatus == "CHECK_TURN") {
+                    data = {
+                        eventName: EVENT_NAME.REJOIN_GAME,
+                        data: {
+                            gameStatus: findTable.gameStatus,
+                            data,
+                            tableData: findTable
+                        },
+                        socket
+                    }
+                    return sendToSocketIdEmmiter(data)
+                }
+
+                if (findTable.gameStatus == "PLAYING") {
+                    data = {
+                        eventName: EVENT_NAME.REJOIN_GAME,
+                        data: {
+                            gameStatus: findTable.gameStatus,
+                            data,
+                            tableData: findTable
+                        },
+                        socket
+                    }
+                    return sendToSocketIdEmmiter(data)
+                }
+                if (findTable.gameStatus == "WINNER" || findTable.gameStatus == "TIE") {
+                    data = {
+                        eventName: EVENT_NAME.REJOIN_GAME,
+                        data: {
+                            gameStatus: findTable.gameStatus,
+                            data,
+                            tableData: findTable
                         },
                         socket
                     }

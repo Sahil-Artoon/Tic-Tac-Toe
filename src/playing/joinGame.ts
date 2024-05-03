@@ -24,7 +24,6 @@ const joinGame = async (data: any, socket: Socket) => {
                     playerInfo: {
                         userId: findUser._id,
                         userName: findUser.userName,
-                        socketId: findUser.socketId,
                         isActive: true,
                         symbol: "O"
                     }
@@ -75,7 +74,6 @@ const joinGame = async (data: any, socket: Socket) => {
                 playerInfo: [{
                     userId: findUser._id,
                     userName: findUser.userName,
-                    socketId: findUser.socketId,
                     isActive: true,
                     symbol: "X"
                 }],
