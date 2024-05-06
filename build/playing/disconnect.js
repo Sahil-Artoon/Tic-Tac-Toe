@@ -20,16 +20,16 @@ const disconnect = (socket) => __awaiter(void 0, void 0, void 0, function* () {
             const updateUserSocketId = yield userModel_1.User.findOneAndUpdate({ socketId: socket.id }, { socketId: '' });
             logger_1.logger.info("Update SocketId successfully At Disconnect Time !!!");
         }
-        const findInTable = yield tableModel_1.Table.findOne({ "playerInfo.socketId": socket.id });
-        if (findInTable) {
-            if (findInTable.gameStatus != 'WINNER' && findInTable.gameStatus != 'TIE') {
-                const updateTable = yield tableModel_1.Table.findByIdAndUpdate({ _id: findInTable._id }, {
-                    $pull: { playerInfo: { socketId: socket.id } },
-                    $inc: { activePlayer: -1 }
-                });
-                logger_1.logger.info("Update Table successfully At Disconnect Time");
-            }
-        }
+        // const findInTable = await Table.findOne({ "playerInfo.socketId": socket.id })
+        // if (findInTable) {
+        //     if (findInTable.gameStatus != 'WINNER' && findInTable.gameStatus != 'TIE') {
+        //         const updateTable = await Table.findByIdAndUpdate({ _id: findInTable._id }, {
+        //             $pull: { playerInfo: { socketId: socket.id } },
+        //             $inc: { activePlayer: -1 }
+        //         })
+        //         logger.info("Update Table successfully At Disconnect Time");
+        //     }
+        // }
         const checkTable = yield tableModel_1.Table.find({ activePlayer: 0 });
         if (checkTable) {
             checkTable.map((item) => __awaiter(void 0, void 0, void 0, function* () {

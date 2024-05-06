@@ -6,7 +6,7 @@ import { logger } from "../logger";
 
 const checkTurn = async (data: any) => {
     try {
-        logger.info(`Data is This :::${JSON.stringify(data.tableId)}`)
+        logger.info(`CheckTurn Data :::${JSON.stringify(data.tableId)}`)
         // RandomeTurn
         const randomNumber = Math.random();
         const ramdomNumberForGiveUserTurn = Math.round(randomNumber);

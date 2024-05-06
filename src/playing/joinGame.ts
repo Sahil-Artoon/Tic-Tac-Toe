@@ -7,6 +7,7 @@ import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter"
 import { set } from "mongoose"
 import { changeTurn } from "./changeTurn"
 import { checkTurn } from "./checkTurn"
+import { roundTimer } from "../bull/queue/roundTimer"
 
 const joinGame = async (data: any, socket: Socket) => {
     try {
@@ -61,12 +62,16 @@ const joinGame = async (data: any, socket: Socket) => {
                         socket
                     }
                     sendToRoomEmmiter(data)
-
-                    await setTimeout(() => {
-                        checkTurn({
-                            tableId: updateTable._id
-                        })
-                    }, 11000);
+                    data = {
+                        tableId: updateTable._id,
+                        time: 11000
+                    }
+                    await roundTimer(data)
+                    // await setTimeout(() => {
+                    //     checkTurn({
+                    //         tableId: updateTable._id
+                    //     })
+                    // }, 11000);
                 }
             }
         } else {

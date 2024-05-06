@@ -9,25 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.winner = void 0;
+exports.declareWinner = void 0;
 const logger_1 = require("../logger");
 const eventName_1 = require("../constant/eventName");
 const eventEmmitter_1 = require("../eventEmmitter");
 const tableModel_1 = require("../model/tableModel");
-const winner = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
+const declareWinner = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        logger_1.logger.info(`Data is ::: ${JSON.stringify(data)} and socket is ::: ${socket.id}`);
+        logger_1.logger.info(`Data is Winner::::::: ${JSON.stringify(data)}`);
+        console.log("Declare Winner Data", data);
         if (data.symbol == "TIE") {
             let tableId = data.tableId;
-            let gameStatusUpdate = yield tableModel_1.Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE" });
+            yield tableModel_1.Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE", winnerUserId: data.userId });
             data = {
                 eventName: eventName_1.EVENT_NAME.WINNER,
                 data: {
-                    _id: data.tableId,
+                    _id: data.tableId.toString(),
                     message: "TIE",
                     symbol: data.symbol
-                },
-                socket
+                }
             };
             setTimeout(() => {
                 deleteTable(tableId);
@@ -36,15 +36,14 @@ const winner = (data, socket) => __awaiter(void 0, void 0, void 0, function* () 
         }
         if (data.symbol == "O" || data.symbol == "X") {
             let tableId = data.tableId;
-            let gameStatusUpdate = yield tableModel_1.Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER" });
+            yield tableModel_1.Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER", winnerUserId: data.userId });
             data = {
                 eventName: eventName_1.EVENT_NAME.WINNER,
                 data: {
-                    _id: data.tableId,
+                    _id: data.tableId.toString(),
                     message: "Winner",
                     symbol: data.symbol
                 },
-                socket
             };
             setTimeout(() => {
                 deleteTable(tableId);
@@ -57,7 +56,7 @@ const winner = (data, socket) => __awaiter(void 0, void 0, void 0, function* () 
         logger_1.logger.error("Winner Error:", error);
     }
 });
-exports.winner = winner;
+exports.declareWinner = declareWinner;
 const deleteTable = (tableId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield tableModel_1.Table.findByIdAndDelete(tableId);

@@ -15,9 +15,7 @@ const eventName_1 = require("../constant/eventName");
 const signUpUser_1 = require("../playing/signUpUser");
 const joinGame_1 = require("../playing/joinGame");
 const playGame_1 = require("../playing/playGame");
-const winner_1 = require("../playing/winner");
-const checkTurn_1 = require("../playing/checkTurn");
-const changeTurn_1 = require("../playing/changeTurn");
+const reJoinGame_1 = require("../playing/reJoinGame");
 const eventHandler = (socket) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         socket.onAny((eventName, data) => {
@@ -32,14 +30,8 @@ const eventHandler = (socket) => __awaiter(void 0, void 0, void 0, function* () 
                 case eventName_1.EVENT_NAME.PLAY_GAME:
                     (0, playGame_1.playGame)(data, socket);
                     break;
-                case eventName_1.EVENT_NAME.CHANGE_TURN:
-                    (0, changeTurn_1.changeTurn)(data, socket);
-                    break;
-                case eventName_1.EVENT_NAME.CHECK_TURN:
-                    (0, checkTurn_1.checkTurn)(data, socket);
-                    break;
-                case eventName_1.EVENT_NAME.WINNER:
-                    (0, winner_1.winner)(data, socket);
+                case eventName_1.EVENT_NAME.REJOIN_GAME:
+                    (0, reJoinGame_1.reJoinGame)(data, socket);
                     break;
             }
         });

@@ -15,10 +15,6 @@ const tableSchema = new mongoose_1.default.Schema({
                 type: String,
                 required: true
             },
-            socketId: {
-                type: String,
-                required: true
-            },
             isActive: {
                 type: Boolean,
                 default: false
@@ -51,6 +47,9 @@ const tableSchema = new mongoose_1.default.Schema({
         type: String
     },
     currentTurnUserId: {
+        type: String
+    },
+    winnerUserId: {
         type: String
     }
 }, { timestamps: true });

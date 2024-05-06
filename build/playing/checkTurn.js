@@ -14,28 +14,29 @@ const eventEmmitter_1 = require("../eventEmmitter");
 const eventName_1 = require("../constant/eventName");
 const tableModel_1 = require("../model/tableModel");
 const logger_1 = require("../logger");
-const checkTurn = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
+const checkTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        logger_1.logger.info(`Data is This :::${JSON.stringify(data)} and Socket is ::::: ${socket.id}`);
+        logger_1.logger.info(`CheckTurn Data :::${JSON.stringify(data.tableId)}`);
         // RandomeTurn
         const randomNumber = Math.random();
         const ramdomNumberForGiveUserTurn = Math.round(randomNumber);
-        let dataOfTable = yield tableModel_1.Table.findById(data.data.tableId);
+        console.log(`Random number is::::${ramdomNumberForGiveUserTurn}`);
+        let dataOfTable = yield tableModel_1.Table.findById(data.tableId);
         if (dataOfTable) {
             yield tableModel_1.Table.findByIdAndUpdate(dataOfTable._id, {
                 currentTurnSeatIndex: ramdomNumberForGiveUserTurn,
                 currentTurnUserId: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
                 gameStatus: "CHECK_TURN"
             });
+            console.log("Check Turn Room id::::", dataOfTable._id);
             data = {
                 eventName: eventName_1.EVENT_NAME.CHECK_TURN,
                 data: {
-                    _id: data.data.tableId,
+                    _id: dataOfTable._id.toString(),
                     symbol: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].symbol,
-                    userID: data.userID,
+                    userID: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
                     message: "ok"
-                },
-                socket
+                }
             };
             (0, eventEmmitter_1.sendToRoomEmmiter)(data);
         }

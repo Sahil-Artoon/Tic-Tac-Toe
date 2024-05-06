@@ -15,6 +15,7 @@ const tableModel_1 = require("../model/tableModel");
 const userModel_1 = require("../model/userModel");
 const eventName_1 = require("../constant/eventName");
 const eventEmmitter_1 = require("../eventEmmitter");
+const roundTimer_1 = require("../bull/queue/roundTimer");
 const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         logger_1.logger.info(`socket id Is::: ${socket.id} and data is::: ${JSON.stringify(data)}`);
@@ -32,7 +33,6 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                     playerInfo: {
                         userId: findUser._id,
                         userName: findUser.userName,
-                        socketId: findUser.socketId,
                         isActive: true,
                         symbol: "O"
                     }
@@ -46,7 +46,7 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                     data = {
                         eventName: eventName_1.EVENT_NAME.JOIN_TABLE,
                         data: {
-                            data: newTable.playerInfo[1],
+                            data: newTable,
                             message: "ok",
                             status: "waiting"
                         },
@@ -54,7 +54,7 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                     };
                     (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
                 }
-                let gameStatusUpdate = yield tableModel_1.Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" });
+                yield tableModel_1.Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" });
                 const currentTable = yield tableModel_1.Table.findById(updateTable._id);
                 if (currentTable) {
                     socket.join(currentTable._id.toString());
@@ -69,6 +69,16 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                         socket
                     };
                     (0, eventEmmitter_1.sendToRoomEmmiter)(data);
+                    data = {
+                        tableId: updateTable._id,
+                        time: 10000
+                    };
+                    yield (0, roundTimer_1.roundTimer)(data);
+                    // await setTimeout(() => {
+                    //     checkTurn({
+                    //         tableId: updateTable._id
+                    //     })
+                    // }, 11000);
                 }
             }
         }
@@ -77,7 +87,6 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                 playerInfo: [{
                         userId: findUser._id,
                         userName: findUser.userName,
-                        socketId: findUser.socketId,
                         isActive: true,
                         symbol: "X"
                     }],
@@ -101,7 +110,7 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                 data = {
                     eventName: eventName_1.EVENT_NAME.JOIN_TABLE,
                     data: {
-                        data: generateTable.playerInfo[0],
+                        data: generateTable,
                         message: "ok",
                         status: "Waiting"
                     },

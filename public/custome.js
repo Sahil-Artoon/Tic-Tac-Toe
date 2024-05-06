@@ -254,29 +254,29 @@ const reJoinGame = (data) => {
             PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
         }
     }
-    if (data.gameStatus == "WINNER" || data.gameStatus == "TIE") {
-        symbol = data.data.userData.symbol;
-        userId = data.data.userData.userId;
-        userName = data.data.userData.userName;
-        tableId = data.data.tableId;
-        document.querySelector('.form-container').style.display = 'none'
-        document.querySelector('#all-game').style.display = 'block';
-        document.querySelector(".board").classList.add("disabled");
-        for (let i = 0; i < data.tableData.playingData.length; i++) {
-            PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
-        }
-        if (data.gameStatus == "WINNER") {
-            if (data.tableData.winnerUserId == userId) {
-                document.getElementById('winner').innerHTML = `${userName} You Win`;
-            }
-            if (data.tableData.winnerUserId != userId) {
-                document.getElementById('winner').innerHTML = `${userName} You Lose`;
-            }
-        }
-        if (data.gameStatus == "TIE") {
-            document.getElementById('winner').innerHTML = `It's TIE`;
-        }
-    }
+    // if (data.gameStatus == "WINNER" || data.gameStatus == "TIE") {
+    //     symbol = data.data.userData.symbol;
+    //     userId = data.data.userData.userId;
+    //     userName = data.data.userData.userName;
+    //     tableId = data.data.tableId;
+    //     document.querySelector('.form-container').style.display = 'none'
+    //     document.querySelector('#all-game').style.display = 'block';
+    //     document.querySelector(".board").classList.add("disabled");
+    //     for (let i = 0; i < data.tableData.playingData.length; i++) {
+    //         PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
+    //     }
+    //     if (data.gameStatus == "WINNER") {
+    //         if (data.tableData.winnerUserId == userId) {
+    //             document.getElementById('winner').innerHTML = `${userName} You Win`;
+    //         }
+    //         if (data.tableData.winnerUserId != userId) {
+    //             document.getElementById('winner').innerHTML = `${userName} You Lose`;
+    //         }
+    //     }
+    //     if (data.gameStatus == "TIE") {
+    //         document.getElementById('winner').innerHTML = `It's TIE`;
+    //     }
+    // }
 }
 
 const PrintTableDataAtRejoinTime = (data, index) => {

@@ -1,0 +1,5 @@
+const QUEUE_EVENT = {
+    ROUND_TIMER: "ROUND_TIMER",
+}
+
+export { QUEUE_EVENT }

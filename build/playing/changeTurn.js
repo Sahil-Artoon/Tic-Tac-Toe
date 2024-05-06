@@ -14,9 +14,10 @@ const logger_1 = require("../logger");
 const tableModel_1 = require("../model/tableModel");
 const eventName_1 = require("../constant/eventName");
 const eventEmmitter_1 = require("../eventEmmitter");
-const changeTurn = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
+const changeTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        logger_1.logger.info(`changeTurn:::Data: ${JSON.stringify(data)} and Socket Id::: ${socket.id}`);
+        logger_1.logger.info(`changeTurn:::Data: ${JSON.stringify(data)}`);
+        console.log("Change Turn Data Is:::", data);
         // {"tableId":"662f7557b813436b36222971","userId":"662f{"tableId":"666b7a66976c3419de4a85"} and Socket Id::: 
         // oNs_l6DzrGbCde4a85"} and S2f7557b813436b36222971","userId":Xt31AAAH
         let findTable = yield tableModel_1.Table.findById(data.tableId);
@@ -29,7 +30,7 @@ const changeTurn = (data, socket) => __awaiter(void 0, void 0, void 0, function*
                 data = {
                     eventName: eventName_1.EVENT_NAME.CHANGE_TURN,
                     data: {
-                        _id: data.tableId,
+                        _id: updateTable === null || updateTable === void 0 ? void 0 : updateTable._id.toString(),
                         data: updateTable === null || updateTable === void 0 ? void 0 : updateTable.playerInfo[1],
                         userId: updateTable === null || updateTable === void 0 ? void 0 : updateTable.playerInfo[1].userId,
                         symbol: updateTable === null || updateTable === void 0 ? void 0 : updateTable.playerInfo[1].symbol
@@ -45,7 +46,7 @@ const changeTurn = (data, socket) => __awaiter(void 0, void 0, void 0, function*
                 data = {
                     eventName: eventName_1.EVENT_NAME.CHANGE_TURN,
                     data: {
-                        _id: data.tableId,
+                        _id: updateTable === null || updateTable === void 0 ? void 0 : updateTable._id.toString(),
                         data: updateTable === null || updateTable === void 0 ? void 0 : updateTable.playerInfo[0],
                         userId: updateTable === null || updateTable === void 0 ? void 0 : updateTable.playerInfo[0].userId,
                         symbol: updateTable === null || updateTable === void 0 ? void 0 : updateTable.playerInfo[0].symbol
