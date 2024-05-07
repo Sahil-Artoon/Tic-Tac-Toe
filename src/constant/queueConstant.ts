@@ -1,5 +1,6 @@
 const QUEUE_EVENT = {
     ROUND_TIMER: "ROUND_TIMER",
+    RE_START: "RE_START",
 }
 
 export { QUEUE_EVENT }

@@ -2,6 +2,7 @@ import { logger } from "../logger";
 import { EVENT_NAME } from "../constant/eventName";
 import { sendToRoomEmmiter } from "../eventEmmitter";
 import { Table } from "../model/tableModel";
+import { reStart } from "../bull/queue/reStart";
 
 const declareWinner = async (data: any) => {
     try {
@@ -15,29 +16,34 @@ const declareWinner = async (data: any) => {
                 data: {
                     _id: data.tableId.toString(),
                     message: "TIE",
-                    symbol: data.symbol
+                    symbol: data.symbol,
+                    timer: 10000
                 }
             }
             setTimeout(() => {
                 deleteTable(tableId)
             }, 60000)
-            return sendToRoomEmmiter(data)
+            sendToRoomEmmiter(data)
+            return await reStart(data.data)
         }
         if (data.symbol == "O" || data.symbol == "X") {
             let tableId = data.tableId
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNER", winnerUserId: data.userId })
+            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNING", winnerUserId: data.userId })
             data = {
                 eventName: EVENT_NAME.WINNER,
                 data: {
                     _id: data.tableId.toString(),
                     message: "Winner",
-                    symbol: data.symbol
+                    symbol: data.symbol,
+                    timer: 10000
                 },
             }
             setTimeout(() => {
                 deleteTable(tableId)
             }, 60000)
-            return sendToRoomEmmiter(data)
+
+            sendToRoomEmmiter(data)
+            return await reStart(data.data)
         }
     } catch (error) {
         console.log("Winner Error:", error)

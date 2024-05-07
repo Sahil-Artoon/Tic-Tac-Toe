@@ -73,6 +73,11 @@ function getSession(key) {
     const value = sessionStorage.getItem(key);
     return value ? JSON.parse(value) : null;
 }
+
+//::::::: Print Bord Value at Rejoin Time ::::::::
+const PrintTableDataAtRejoinTime = (data, index) => {
+    document.getElementById(`cell-${index + 1}`).textContent = data.symbol
+}
 // ::::::::::::::::::::::::::::::::::::::::::::
 
 // :::::::::::::: Socket.on All Functions :::::::::::::::
@@ -183,16 +188,16 @@ const declareWinner = (data) => {
             document.getElementById('winner').innerHTML = `${userName} You Lose`;
             document.querySelector(".board").classList.add("disabled");
         }
-        setTimeout(() => {
-            window.location.reload();
-        }, 10000)
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 10000)
     }
     if (data.message == "TIE") {
         document.getElementById('winner').innerHTML = "IT'S TIE";
         document.querySelector(".board").classList.add("disabled");
-        setTimeout(() => {
-            window.location.reload();
-        }, 10000)
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 10000)
     }
 }
 
@@ -254,33 +259,35 @@ const reJoinGame = (data) => {
             PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
         }
     }
-    // if (data.gameStatus == "WINNER" || data.gameStatus == "TIE") {
-    //     symbol = data.data.userData.symbol;
-    //     userId = data.data.userData.userId;
-    //     userName = data.data.userData.userName;
-    //     tableId = data.data.tableId;
-    //     document.querySelector('.form-container').style.display = 'none'
-    //     document.querySelector('#all-game').style.display = 'block';
-    //     document.querySelector(".board").classList.add("disabled");
-    //     for (let i = 0; i < data.tableData.playingData.length; i++) {
-    //         PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
-    //     }
-    //     if (data.gameStatus == "WINNER") {
-    //         if (data.tableData.winnerUserId == userId) {
-    //             document.getElementById('winner').innerHTML = `${userName} You Win`;
-    //         }
-    //         if (data.tableData.winnerUserId != userId) {
-    //             document.getElementById('winner').innerHTML = `${userName} You Lose`;
-    //         }
-    //     }
-    //     if (data.gameStatus == "TIE") {
-    //         document.getElementById('winner').innerHTML = `It's TIE`;
-    //     }
-    // }
+    if (data.gameStatus == "WINNING" || data.gameStatus == "TIE") {
+        symbol = data.data.userData.symbol;
+        userId = data.data.userData.userId;
+        userName = data.data.userData.userName;
+        tableId = data.data.tableId;
+        document.querySelector('.form-container').style.display = 'none'
+        document.querySelector('#all-game').style.display = 'block';
+        document.querySelector(".board").classList.add("disabled");
+        for (let i = 0; i < data.tableData.playingData.length; i++) {
+            PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
+        }
+        if (data.gameStatus == "WINNING") {
+            if (data.tableData.winnerUserId == userId) {
+                document.getElementById('winner').innerHTML = `${userName} You Win`;
+            }
+            if (data.tableData.winnerUserId != userId) {
+                document.getElementById('winner').innerHTML = `${userName} You Lose`;
+            }
+        }
+        if (data.gameStatus == "TIE") {
+            document.getElementById('winner').innerHTML = `It's TIE`;
+        }
+    }
 }
 
-const PrintTableDataAtRejoinTime = (data, index) => {
-    document.getElementById(`cell-${index + 1}`).textContent = data.symbol
+const reStart = (data) => {
+    console.log("EvenetName is reStart :::::", data);
+    sessionStorage.clear();
+    window.location.reload();
 }
 
 const sendEmmiter = (data) => {
@@ -314,6 +321,9 @@ socket.onAny((eventName, data) => {
             break;
         case "REJOIN_GAME":
             reJoinGame(data)
+            break;
+        case "RE_START":
+            reStart(data)
             break;
         default:
             break;

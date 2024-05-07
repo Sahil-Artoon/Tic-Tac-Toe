@@ -88,7 +88,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                     }
                     return sendToSocketIdEmmiter(data)
                 }
-                if (findTable.gameStatus == "WINNER" || findTable.gameStatus == "TIE") {
+                if (findTable.gameStatus == "WINNING" || findTable.gameStatus == "TIE") {
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
