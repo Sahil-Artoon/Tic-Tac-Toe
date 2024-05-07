@@ -6,18 +6,19 @@ import { QUEUE_EVENT } from "../../constant/queueConstant";
 
 const roundTimer = (data: any) => {
     try {
-        const roundTimerQueue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
+        const tableId: any = data.tableId
+        console.log("current table Id is ::::", tableId)
+        let roundTimerQueue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
         let options = {
-            tableId: data.tableId.toString(),
+            jobId: tableId.toString(),
             delay: data.time,
             attempts: 1
         }
         console.log("Options:::::::", options)
         roundTimerQueue.add(data, options)
-        roundTimerQueue.process(() => {
-            console.log("option.tableId Is:::::",options.tableId)
+        roundTimerQueue.process((data: any) => {
             data = {
-                tableId: options.tableId.toString()
+                tableId: data.data.tableId
             }
             checkTurn(data)
         })

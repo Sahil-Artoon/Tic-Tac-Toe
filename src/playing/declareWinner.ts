@@ -17,12 +17,12 @@ const declareWinner = async (data: any) => {
                     _id: data.tableId.toString(),
                     message: "TIE",
                     symbol: data.symbol,
-                    timer: 10000
+                    timer: 5000
                 }
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, 60000)
+            }, (60000 * 2))
             sendToRoomEmmiter(data)
             return await reStart(data.data)
         }
@@ -35,12 +35,12 @@ const declareWinner = async (data: any) => {
                     _id: data.tableId.toString(),
                     message: "Winner",
                     symbol: data.symbol,
-                    timer: 10000
+                    timer: 5000
                 },
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, 60000)
+            }, (60000 * 2))
 
             sendToRoomEmmiter(data)
             return await reStart(data.data)

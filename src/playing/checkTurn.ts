@@ -8,9 +8,14 @@ const checkTurn = async (data: any) => {
     try {
         logger.info(`CheckTurn Data :::${JSON.stringify(data.tableId)}`)
         // RandomeTurn
-        const randomNumber = Math.random();
-        const ramdomNumberForGiveUserTurn = Math.round(randomNumber);
-        console.log(`Random number is::::${ramdomNumberForGiveUserTurn}`)
+        const randomNumber = Math.floor(Math.random() * 100) + 1;
+        let ramdomNumberForGiveUserTurn;
+        if (randomNumber % 2 == 1) {
+            ramdomNumberForGiveUserTurn = 1;
+        } else {
+            ramdomNumberForGiveUserTurn = 0;
+        }
+        console.log(`Random number is::::${1}`)
         let dataOfTable = await Table.findById(data.tableId)
         if (dataOfTable) {
             await Table.findByIdAndUpdate(dataOfTable._id, {
@@ -18,7 +23,7 @@ const checkTurn = async (data: any) => {
                 currentTurnUserId: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
                 gameStatus: "CHECK_TURN"
             })
-            console.log("Check Turn Room id::::",dataOfTable._id)
+            console.log("Check Turn Room id::::", dataOfTable._id)
             data = {
                 eventName: EVENT_NAME.CHECK_TURN,
                 data: {
