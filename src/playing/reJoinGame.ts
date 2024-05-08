@@ -5,13 +5,35 @@ import { User } from "../model/userModel";
 import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter";
 import { EVENT_NAME } from "../constant/eventName";
 import { eventHandler } from "../eventHandler";
+import { getJob } from "../bull/getQueue/getRoundTimerQueue";
+import { validateRejoinData } from "../validation/rejoinValidation";
 
 const reJoinGame = async (data: any, socket: Socket) => {
     try {
         logger.info(`eventName is::::: Rejoin_game and data is::: ${JSON.stringify(data)}`)
         // console.log("Rejoin Event::::::", data)
+        let checkData = await validateRejoinData(data)
+        if (checkData.error) {
+            data = {
+                eventName: EVENT_NAME.REJOIN_GAME,
+                data: {
+                    message: checkData.error?.details[0].message
+                },
+                socket
+            }
+            return sendToSocketIdEmmiter(data);
+        }
         let findTable = await Table.findById(data.tableId)
-
+        if (checkData.error) {
+            data = {
+                eventName: EVENT_NAME.REJOIN_GAME,
+                data: {
+                    message: "Can't found record !!!"
+                },
+                socket
+            }
+            return sendToSocketIdEmmiter(data);
+        }
         if (findTable) {
             // console.log("This is Rejoin Table ::::", findTable)
             if (findTable.playerInfo.length == 1) {
@@ -53,11 +75,13 @@ const reJoinGame = async (data: any, socket: Socket) => {
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "ROUND_TIMER_START") {
+                    const getpanddingTime = await getJob(findTable._id.toString())
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
                             gameStatus: findTable.gameStatus,
-                            data
+                            data,
+                            time: getpanddingTime
                         },
                         socket
                     }

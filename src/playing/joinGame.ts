@@ -8,14 +8,35 @@ import { set } from "mongoose"
 import { changeTurn } from "./changeTurn"
 import { checkTurn } from "./checkTurn"
 import { roundTimer } from "../bull/queue/roundTimer"
+import { validateJoinTable } from "../validation/joinTableValidation"
 
 const joinGame = async (data: any, socket: Socket) => {
     try {
         logger.info(`socket id Is::: ${socket.id} and data is::: ${JSON.stringify(data)}`)
         let { userId } = data
-        if (!userId) return logger.error(`can't Get UserId In Join Table`)
+        const checkData = await validateJoinTable(data)
+        if (checkData.error) {
+            data = {
+                eventName: EVENT_NAME.JOIN_TABLE,
+                data: {
+                    message: checkData.error?.details[0].message
+                },
+                socket
+            }
+            return sendToSocketIdEmmiter(data);
+        }
+
         let findUser = await User.findById(userId)
-        if (!findUser) return logger.error(`can't Find User By UserId`);
+        if (!findUser) {
+            data = {
+                eventName: EVENT_NAME.JOIN_TABLE,
+                data: {
+                    message: "Can't found Table by Id"
+                },
+                socket
+            }
+            return sendToSocketIdEmmiter(data);
+        }
         // logger.info(`FindUser ::::::${findUser}`)
 
         let checkTable = await Table.findOne({ activePlayer: { $lte: 1 } })

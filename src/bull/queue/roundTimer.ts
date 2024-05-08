@@ -20,7 +20,9 @@ const roundTimer = (data: any) => {
             data = {
                 tableId: data.data.tableId
             }
-            checkTurn(data)
+            setTimeout(() =>{
+                checkTurn(data)
+            },1000)
         })
     } catch (error) {
         console.log("Queue RoundTimer Error :::", error)

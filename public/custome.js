@@ -89,6 +89,8 @@ const signUpGame = (data) => {
         // console.log(`UserId is:::::${userId}`)
         document.querySelector('.form-container').style.display = 'none'
         document.querySelector('.play-btn').style.display = 'block'
+    } else {
+        alert(data.message)
     }
 }
 
@@ -125,6 +127,8 @@ const joinGame = (data) => {
         document.querySelector('#all-game').style.display = 'block';
         document.querySelector('#currentUserName').innerHTML = userName
         disableBoard('Waiting');
+    } else {
+        alert(data.message)
     }
 }
 
@@ -138,7 +142,6 @@ const roundTimer = (data) => {
             timerElement.textContent = `Game Start in ${seconds}`;
             seconds--;
             if (seconds < 0) {
-                timerElement.textContent = "Waiting"
                 clearInterval(timerInterval);
             }
         }
@@ -165,6 +168,8 @@ const printValue = (data) => {
     if (data.message == "ok") {
         document.getElementById(data.cellId).innerHTML = data.symbol
         document.getElementById(data.cellId).classList.add("disabled");
+    } else {
+        alert(data.message)
     }
 }
 const changeTurn = (data) => {
@@ -220,7 +225,18 @@ const reJoinGame = (data) => {
         document.querySelector('.form-container').style.display = 'none'
         document.querySelector('#all-game').style.display = 'block';
         document.querySelector('#currentUserName').innerHTML = userName
-        disableBoard('Waiting');
+        disableBoard('');
+        const timerElement = document.getElementById('winner');
+        let seconds = (data.time / 1000) - 1;
+        function updateTimer() {
+            timerElement.textContent = `Game Start in ${seconds}`;
+            seconds--;
+            if (seconds < 0) {
+                clearInterval(timerInterval);
+            }
+        }
+        // Call updateTimer function every second
+        const timerInterval = setInterval(updateTimer, 1000);
     }
     if (data.gameStatus == "CHECK_TURN") {
         symbol = data.data.userData.symbol;

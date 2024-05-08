@@ -3,14 +3,26 @@ import { logger } from "../logger"
 import { json } from "express"
 import { EVENT_NAME } from "../constant/eventName"
 import { Table } from "../model/tableModel"
-import { sendToRoomEmmiter } from "../eventEmmitter"
+import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter"
 import { checkWinner } from "./checkWinner"
 import { declareWinner } from "./declareWinner"
 import { changeTurn } from "./changeTurn"
+import { validatePlayGameData } from "../validation/playGameValidation"
 
 const playGame = async (data: any, socket: Socket) => {
     try {
         logger.info(`THis is Play Data:::::::${JSON.stringify(data)} and Socket is ::::: ${socket.id}`)
+        let checkData = await validatePlayGameData(data)
+        if (checkData.error) {
+            data = {
+                eventName: EVENT_NAME.PLAY_GAME,
+                data: {
+                    message: checkData.error?.details[0].message
+                },
+                socket
+            }
+            return sendToSocketIdEmmiter(data);
+        }
         if (data.sign == "X") {
             // This is for Play
             await Table.findByIdAndUpdate(data.tableId, { gameStatus: "PLAYING" })
@@ -36,7 +48,7 @@ const playGame = async (data: any, socket: Socket) => {
                     sendToRoomEmmiter(data)
                     data = {
                         tableId: findTableForCheckWinner._id,
-                        userId:data.data.userId,
+                        userId: data.data.userId,
                         symbol: "X",
                     }
                     return await declareWinner(data)
@@ -45,7 +57,7 @@ const playGame = async (data: any, socket: Socket) => {
                         eventName: EVENT_NAME.PLAY_GAME,
                         data: {
                             _id: data.tableId,
-                            userId:data.userId,
+                            userId: data.userId,
                             symbol: "X",
                             message: "ok",
                             winner: "TIE",
@@ -56,7 +68,7 @@ const playGame = async (data: any, socket: Socket) => {
                     sendToRoomEmmiter(data)
                     data = {
                         tableId: findTableForCheckWinner._id,
-                        userId:data.data.userId,
+                        userId: data.data.userId,
                         symbol: "TIE",
                     }
                     return await declareWinner(data)
@@ -65,7 +77,7 @@ const playGame = async (data: any, socket: Socket) => {
                     eventName: EVENT_NAME.PLAY_GAME,
                     data: {
                         _id: data.tableId,
-                        userId:data.userId,
+                        userId: data.userId,
                         symbol: "X",
                         message: "ok",
                         winner: false,
@@ -93,7 +105,7 @@ const playGame = async (data: any, socket: Socket) => {
                         data: {
                             _id: data.tableId,
                             symbol: "O",
-                            userId:data.userId,
+                            userId: data.userId,
                             winner: true,
                             message: "ok",
                             cellId: data.data
@@ -103,7 +115,7 @@ const playGame = async (data: any, socket: Socket) => {
                     sendToRoomEmmiter(data)
                     data = {
                         tableId: findTableForCheckWinner._id,
-                        userId:data.data.userId,
+                        userId: data.data.userId,
                         symbol: "O",
                     }
                     return await declareWinner(data)
@@ -112,7 +124,7 @@ const playGame = async (data: any, socket: Socket) => {
                         eventName: EVENT_NAME.PLAY_GAME,
                         data: {
                             _id: data.tableId,
-                            userId:data.userId,
+                            userId: data.userId,
                             symbol: "O",
                             message: "ok",
                             winner: "TIE",
@@ -123,7 +135,7 @@ const playGame = async (data: any, socket: Socket) => {
                     sendToRoomEmmiter(data)
                     data = {
                         tableId: findTableForCheckWinner._id,
-                        userId:data.data.userId,
+                        userId: data.data.userId,
                         symbol: "TIE",
                     }
                     return await declareWinner(data)
@@ -132,7 +144,7 @@ const playGame = async (data: any, socket: Socket) => {
                     eventName: EVENT_NAME.PLAY_GAME,
                     data: {
                         _id: data.tableId,
-                        userId:data.userId,
+                        userId: data.userId,
                         symbol: "O",
                         message: "ok",
                         winner: false,
