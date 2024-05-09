@@ -11,11 +11,11 @@ import { validatePlayGameData } from "../validation/playGameValidation"
 
 const playGame = async (data: any, socket: Socket) => {
     try {
-        logger.info(`THis is Play Data:::::::${JSON.stringify(data)} and Socket is ::::: ${socket.id}`)
+        logger.info(`PLAY_GAME EVENT DATA :::: ${JSON.stringify(data)}`)
         let checkData = await validatePlayGameData(data)
         if (checkData.error) {
             data = {
-                eventName: EVENT_NAME.PLAY_GAME,
+                eventName: EVENT_NAME.POP_UP,
                 data: {
                     message: checkData.error?.details[0].message
                 },
@@ -157,8 +157,7 @@ const playGame = async (data: any, socket: Socket) => {
             }
         }
     } catch (error) {
-        console.log("PlayGame Error: ", error)
-        logger.error("PlayGame Error: ", error)
+        logger.error("PLAY_GAME ERROR: ", error)
     }
 }
 export { playGame }

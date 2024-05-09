@@ -3,13 +3,15 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     userName: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
-    socketId:{
+    socketId: {
+        type: String
+    },
+    tableId: {
         type: String
     }
-},{timestamps:true})
+}, { timestamps: true })
 
 const User = mongoose.model('User', userSchema)
 

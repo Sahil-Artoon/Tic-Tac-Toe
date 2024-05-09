@@ -217,3 +217,22 @@ input[type="submit"]:hover {
     opacity: 0;
   }
 }
+
+
+
+#leave-button {
+  position: absolute;
+  top: 20%;
+  right: 10%;
+  padding: 10px 20px;
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+}
+
+#leave-button:hover {
+  background-color: #d00;
+}

@@ -10,6 +10,8 @@ const EVENT_NAME = {
     CHANGE_TURN: "CHANGE_TURN",
     REJOIN_GAME: "REJOIN_GAME",
     RE_START: "RE_START",
+    POP_UP: "POP_UP",
+    LEAVE_GAME: "LEAVE_GAME",
 }
 
 export { EVENT_NAME }

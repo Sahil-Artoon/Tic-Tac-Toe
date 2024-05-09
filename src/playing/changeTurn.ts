@@ -5,10 +5,7 @@ import { sendToRoomEmmiter } from "../eventEmmitter";
 
 const changeTurn = async (data: any) => {
     try {
-        logger.info(`changeTurn:::Data: ${JSON.stringify(data)}`);
-        console.log("Change Turn Data Is:::",data)
-        // {"tableId":"662f7557b813436b36222971","userId":"662f{"tableId":"666b7a66976c3419de4a85"} and Socket Id::: 
-        // oNs_l6DzrGbCde4a85"} and S2f7557b813436b36222971","userId":Xt31AAAH
+        logger.info(`CHANGE_TURN DATA :::: ${JSON.stringify(data)}`);
         let findTable = await Table.findById(data.tableId)
         if (findTable) {
             if (findTable.currentTurnSeatIndex == "0") {
@@ -45,8 +42,7 @@ const changeTurn = async (data: any) => {
             }
         }
     } catch (error) {
-        console.log("changeTurn ::::", error)
-        logger.error(`changeTurn Error: ${error}`)
+        logger.error(`CHANGE_TURN ERROR :::: ${error}`)
     }
 }
 

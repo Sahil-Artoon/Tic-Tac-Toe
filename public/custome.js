@@ -51,6 +51,21 @@ function sendIdToSocket(id) {
     sendEmmiter(data)
 }
 
+// leave Table
+
+function leaveTable() {
+    let getDataOfSession = getSession('CurrentUser')
+    if (getDataOfSession) {
+        data = {
+            eventName: 'LEAVE_GAME',
+            data: {
+                userData: getDataOfSession
+            }
+        }
+        sendEmmiter(data)
+    }
+}
+
 function disableBoard(data) {
     // console.log("Status Data=======", data);
     document.querySelector(".board").classList.add("disabled");
@@ -89,8 +104,6 @@ const signUpGame = (data) => {
         // console.log(`UserId is:::::${userId}`)
         document.querySelector('.form-container').style.display = 'none'
         document.querySelector('.play-btn').style.display = 'block'
-    } else {
-        alert(data.message)
     }
 }
 
@@ -126,9 +139,8 @@ const joinGame = (data) => {
         document.querySelector('.play-btn').style.display = 'none';
         document.querySelector('#all-game').style.display = 'block';
         document.querySelector('#currentUserName').innerHTML = userName
+        document.getElementById('leave-button').style.display = 'block';
         disableBoard('Waiting');
-    } else {
-        alert(data.message)
     }
 }
 
@@ -153,6 +165,7 @@ const roundTimer = (data) => {
 const checkTurn = (data) => {
     console.log(`Data Of CheckTurn:::${JSON.stringify(data)}`)
     if (data.message == "ok") {
+        document.getElementById('leave-button').style.display = "block"
         if (data.symbol == symbol) {
             enableBoard()
             document.getElementById('winner').innerHTML = "It's your Turn.";
@@ -168,8 +181,6 @@ const printValue = (data) => {
     if (data.message == "ok") {
         document.getElementById(data.cellId).innerHTML = data.symbol
         document.getElementById(data.cellId).classList.add("disabled");
-    } else {
-        alert(data.message)
     }
 }
 const changeTurn = (data) => {
@@ -185,6 +196,7 @@ const changeTurn = (data) => {
 const declareWinner = (data) => {
     console.log(`Data of DeclareWinner is :::${JSON.stringify(data)}`)
     if (data.message == "Winner") {
+        document.getElementById('leave-button').style.display = "none"
         if (data.symbol == symbol) {
             document.getElementById('winner').innerHTML = `${userName} You Win`;
             document.querySelector(".board").classList.add("disabled");
@@ -193,110 +205,144 @@ const declareWinner = (data) => {
             document.getElementById('winner').innerHTML = `${userName} You Lose`;
             document.querySelector(".board").classList.add("disabled");
         }
-        // setTimeout(() => {
-        //     window.location.reload();
-        // }, 10000)
     }
     if (data.message == "TIE") {
+        document.getElementById('leave-button').style.display = "none"
         document.getElementById('winner').innerHTML = "IT'S TIE";
         document.querySelector(".board").classList.add("disabled");
-        // setTimeout(() => {
-        //     window.location.reload();
-        // }, 10000)
     }
 }
 
 const reJoinGame = (data) => {
     console.log("EvenetName is Rejoin :::::", data);
+    if (data.message == "ok") {
+        if (data.gameStatus == "WATING") {
+            symbol = data.data.userData.symbol;
+            userId = data.data.userData.userId;
+            userName = data.data.userData.userName;
+            document.querySelector('.form-container').style.display = 'none'
+            document.getElementById('leave-button').style.display = 'block'
+            document.querySelector('#all-game').style.display = 'block';
+            document.querySelector('#currentUserName').innerHTML = userName
+            disableBoard('Waiting');
+        }
+        if (data.gameStatus == "ROUND_TIMER_START") {
+            symbol = data.data.userData.symbol;
+            userId = data.data.userData.userId;
+            userName = data.data.userData.userName;
+            tableId = data.data.tableId;
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            document.querySelector('#currentUserName').innerHTML = userName
+            disableBoard('');
+            if (data.leaveButton == true) {
+                document.getElementById('leave-button').style.display = "block"
+            } else {
+                document.getElementById('leave-button').style.display = "none"
+            }
+            const timerElement = document.getElementById('winner');
+            let seconds = (data.time / 1000) - 1;
+            function updateTimer() {
+                timerElement.textContent = `Game Start in ${seconds}`;
+                seconds--;
+                if (seconds < 0) {
+                    clearInterval(timerInterval);
+                }
+            }
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+        if (data.gameStatus == "CHECK_TURN") {
+            symbol = data.data.userData.symbol;
+            userId = data.data.userData.userId;
+            userName = data.data.userData.userName;
+            tableId = data.data.tableId;
+            document.getElementById('leave-button').style.display = "block"
+            if (data.tableData.currentTurnUserId == userId) {
+                document.querySelector('.form-container').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'block';
+                enableBoard()
+                document.getElementById('winner').innerHTML = "It's your Turn.";
+            }
+            if (data.tableData.currentTurnUserId != userId) {
+                document.querySelector('.form-container').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'block';
+                disableBoard('Aponent Turn.')
+            }
+        }
+        if (data.gameStatus == "PLAYING") {
+            symbol = data.data.userData.symbol;
+            userId = data.data.userData.userId;
+            userName = data.data.userData.userName;
+            tableId = data.data.tableId;
+            document.getElementById('leave-button').style.display = "block"
+            if (data.tableData.currentTurnUserId == userId) {
+                document.querySelector('.form-container').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'block';
+                enableBoard()
+                document.getElementById('winner').innerHTML = "It's your Turn.";
+            }
+            if (data.tableData.currentTurnUserId != userId) {
+                document.querySelector('.form-container').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'block';
+                disableBoard('Aponent Turn.')
+            }
+            for (let i = 0; i < data.tableData.playingData.length; i++) {
+                PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
+            }
+        }
+        if (data.gameStatus == "WINNING" || data.gameStatus == "TIE") {
+            symbol = data.data.userData.symbol;
+            userId = data.data.userData.userId;
+            userName = data.data.userData.userName;
+            tableId = data.data.tableId;
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            document.querySelector(".board").classList.add("disabled");
+            for (let i = 0; i < data.tableData.playingData.length; i++) {
+                PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
+            }
+            if (data.gameStatus == "WINNING") {
+                if (data.tableData.winnerUserId == userId) {
+                    document.getElementById('winner').innerHTML = `${userName} You Win`;
+                }
+                if (data.tableData.winnerUserId != userId) {
+                    document.getElementById('winner').innerHTML = `${userName} You Lose`;
+                }
+            }
+            if (data.gameStatus == "TIE") {
+                document.getElementById('winner').innerHTML = `It's TIE`;
+            }
+        }
+    }
+}
+
+const error = (data) => {
+    console.log("EvenetName is Error :::::", data);
+    if (data.return == true) {
+        alert(data.message)
+        document.querySelector('.form-container').style.display = 'block'
+        document.querySelector('.play-btn').style.display = 'none';
+        sessionStorage.clear();
+    } else {
+        alert(data.message)
+    }
+}
+
+const leaveGame = (data) => {
+    console.log("EvenetName is LEAVE_GAME :::::", data);
     if (data.gameStatus == "WATING") {
-        symbol = data.data.userData.symbol;
-        userId = data.data.userData.userId;
-        userName = data.data.userData.userName;
-        document.querySelector('.form-container').style.display = 'none'
-        document.querySelector('#all-game').style.display = 'block';
-        document.querySelector('#currentUserName').innerHTML = userName
-        disableBoard('Waiting');
-    }
-    if (data.gameStatus == "ROUND_TIMER_START") {
-        symbol = data.data.userData.symbol;
-        userId = data.data.userData.userId;
-        userName = data.data.userData.userName;
-        tableId = data.data.tableId;
-        document.querySelector('.form-container').style.display = 'none'
-        document.querySelector('#all-game').style.display = 'block';
-        document.querySelector('#currentUserName').innerHTML = userName
-        disableBoard('');
-        const timerElement = document.getElementById('winner');
-        let seconds = (data.time / 1000) - 1;
-        function updateTimer() {
-            timerElement.textContent = `Game Start in ${seconds}`;
-            seconds--;
-            if (seconds < 0) {
-                clearInterval(timerInterval);
-            }
-        }
-        // Call updateTimer function every second
-        const timerInterval = setInterval(updateTimer, 1000);
-    }
-    if (data.gameStatus == "CHECK_TURN") {
-        symbol = data.data.userData.symbol;
-        userId = data.data.userData.userId;
-        userName = data.data.userData.userName;
-        tableId = data.data.tableId;
-        if (data.tableData.currentTurnUserId == userId) {
-            document.querySelector('.form-container').style.display = 'none'
-            document.querySelector('#all-game').style.display = 'block';
-            enableBoard()
-            document.getElementById('winner').innerHTML = "It's your Turn.";
-        }
-        if (data.tableData.currentTurnUserId != userId) {
-            document.querySelector('.form-container').style.display = 'none'
-            document.querySelector('#all-game').style.display = 'block';
-            disableBoard('Aponent Turn.')
+        if (data.message == "ok") {
+            document.querySelector('.form-container').style.display = 'block'
+            document.getElementById('leave-button').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'none';
         }
     }
-    if (data.gameStatus == "PLAYING") {
-        symbol = data.data.userData.symbol;
-        userId = data.data.userData.userId;
-        userName = data.data.userData.userName;
-        tableId = data.data.tableId;
-        if (data.tableData.currentTurnUserId == userId) {
-            document.querySelector('.form-container').style.display = 'none'
-            document.querySelector('#all-game').style.display = 'block';
-            enableBoard()
-            document.getElementById('winner').innerHTML = "It's your Turn.";
-        }
-        if (data.tableData.currentTurnUserId != userId) {
-            document.querySelector('.form-container').style.display = 'none'
-            document.querySelector('#all-game').style.display = 'block';
-            disableBoard('Aponent Turn.')
-        }
-        for (let i = 0; i < data.tableData.playingData.length; i++) {
-            PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
-        }
-    }
-    if (data.gameStatus == "WINNING" || data.gameStatus == "TIE") {
-        symbol = data.data.userData.symbol;
-        userId = data.data.userData.userId;
-        userName = data.data.userData.userName;
-        tableId = data.data.tableId;
-        document.querySelector('.form-container').style.display = 'none'
-        document.querySelector('#all-game').style.display = 'block';
-        document.querySelector(".board").classList.add("disabled");
-        for (let i = 0; i < data.tableData.playingData.length; i++) {
-            PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
-        }
-        if (data.gameStatus == "WINNING") {
-            if (data.tableData.winnerUserId == userId) {
-                document.getElementById('winner').innerHTML = `${userName} You Win`;
-            }
-            if (data.tableData.winnerUserId != userId) {
-                document.getElementById('winner').innerHTML = `${userName} You Lose`;
-            }
-        }
-        if (data.gameStatus == "TIE") {
-            document.getElementById('winner').innerHTML = `It's TIE`;
-        }
+}
+
+const disableLeaveButton = (data) => {
+    console.log("EvenetName is LEAVE_BUTTON :::::", data);
+    if (data.message == "ok") {
+        document.getElementById('leave-button').style.display = 'none'
     }
 }
 
@@ -341,6 +387,16 @@ socket.onAny((eventName, data) => {
         case "RE_START":
             reStart(data)
             break;
+        case "POP_UP":
+            error(data)
+            break;
+        case "LEAVE_GAME":
+            leaveGame(data)
+            break;
+        case "LEAVE_BUTTON":
+            disableLeaveButton(data)
+            break;
+
         default:
             break;
     }

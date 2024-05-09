@@ -12,12 +12,12 @@ import { validateJoinTable } from "../validation/joinTableValidation"
 
 const joinGame = async (data: any, socket: Socket) => {
     try {
-        logger.info(`socket id Is::: ${socket.id} and data is::: ${JSON.stringify(data)}`)
+        logger.info(`JOIN_TABLE EVENT DATA IS :::: ${JSON.stringify(data)}`)
         let { userId } = data
         const checkData = await validateJoinTable(data)
         if (checkData.error) {
             data = {
-                eventName: EVENT_NAME.JOIN_TABLE,
+                eventName: EVENT_NAME.POP_UP,
                 data: {
                     message: checkData.error?.details[0].message
                 },
@@ -29,18 +29,28 @@ const joinGame = async (data: any, socket: Socket) => {
         let findUser = await User.findById(userId)
         if (!findUser) {
             data = {
-                eventName: EVENT_NAME.JOIN_TABLE,
+                eventName: EVENT_NAME.POP_UP,
                 data: {
-                    message: "Can't found Table by Id"
+                    message: "Can't found User by Id"
                 },
                 socket
             }
             return sendToSocketIdEmmiter(data);
         }
-        // logger.info(`FindUser ::::::${findUser}`)
 
         let checkTable = await Table.findOne({ activePlayer: { $lte: 1 } })
         if (checkTable) {
+            if (findUser.tableId == checkTable._id.toString()) {
+                data = {
+                    eventName: EVENT_NAME.POP_UP,
+                    data: {
+                        message: "User Already in Table !!!",
+                        return: true
+                    },
+                    socket
+                }
+                return sendToSocketIdEmmiter(data);
+            }
             let updateTable = await Table.findByIdAndUpdate({ _id: checkTable._id }, {
                 $push: {
                     playerInfo: {
@@ -53,7 +63,7 @@ const joinGame = async (data: any, socket: Socket) => {
                 activePlayer: 2,
                 gameStatus: "WATING"
             }, { new: true })
-
+            await User.findByIdAndUpdate(checkTable._id, { $set: { tableId: checkTable._id.toString() } });
             if (updateTable) {
                 const newTable = await Table.findById(updateTable._id)
                 if (newTable) {
@@ -87,12 +97,17 @@ const joinGame = async (data: any, socket: Socket) => {
                         tableId: updateTable._id,
                         time: 11000
                     }
+                    setTimeout(() => {
+                        let data = {
+                            eventName: "LEAVE_BUTTON",
+                            data: {
+                                _id: currentTable._id.toString(),
+                                message: "ok"
+                            }
+                        }
+                        sendToRoomEmmiter(data)
+                    }, 6000)
                     await roundTimer(data)
-                    // await setTimeout(() => {
-                    //     checkTurn({
-                    //         tableId: updateTable._id
-                    //     })
-                    // }, 11000);
                 }
             }
         } else {
@@ -119,6 +134,7 @@ const joinGame = async (data: any, socket: Socket) => {
                 currentTurnSeatIndex: "",
                 currentTurnUserId: ""
             })
+            await User.findByIdAndUpdate(generateTable.playerInfo[0].userId, { $set: { tableId: generateTable._id.toString() } });
             if (generateTable) {
                 data = {
                     eventName: EVENT_NAME.JOIN_TABLE,
@@ -134,8 +150,7 @@ const joinGame = async (data: any, socket: Socket) => {
             }
         }
     } catch (error) {
-        console.log(error)
-        logger.error(`Join Game Error: ${error}`)
+        logger.error(`JOIN_TABLE ERROR :::: ${error}`)
     }
 }
 

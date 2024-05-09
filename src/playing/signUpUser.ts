@@ -6,14 +6,14 @@ import { EVENT_NAME } from "../constant/eventName";
 import { signUpValidation } from "../validation/signUpValidation";
 
 const signUp = async (data: any, socket: Socket) => {
-    logger.info(`signUp:::Data: ${JSON.stringify(data)} and Socket Id::: ${socket.id}`);
+    logger.info(`SIGN_UP EVENT DATA :::: ${JSON.stringify(data)}`);
     try {
         let checkData = await signUpValidation(data)
         if (checkData.error) {
             data = {
-                eventName: EVENT_NAME.SIGN_UP,
+                eventName: EVENT_NAME.POP_UP,
                 data: {
-                    message: checkData.error?.details
+                    message: checkData.error?.details[0].message
                 },
                 socket
             }
@@ -49,7 +49,7 @@ const signUp = async (data: any, socket: Socket) => {
             return sendToSocketIdEmmiter(data)
         }
     } catch (error) {
-        logger.error(`SignUp User Error::${error}`);
+        logger.error(`SIGN_UP ERROR :::: ${error}`);
     }
 }
 

@@ -7,11 +7,11 @@ const disconnect = async (socket: Socket) => {
     try {
         const getCurrentUser = await User.findOne({ socketId: socket.id })
         if (getCurrentUser) {
-            const updateUserSocketId = await User.findOneAndUpdate(
+            await User.findOneAndUpdate(
                 { socketId: socket.id },
-                { socketId: '' }
+                { socketId: '', tableId: "" }
             )
-            logger.info("Update SocketId successfully At Disconnect Time !!!")
+            // logger.info("Update SocketId successfully At Disconnect Time !!!")
         }
         // const findInTable = await Table.findOne({ "playerInfo.socketId": socket.id })
         // if (findInTable) {
@@ -28,10 +28,10 @@ const disconnect = async (socket: Socket) => {
             checkTable.map(async (item) => {
                 await Table.findByIdAndDelete({ _id: item._id })
             })
-            logger.info("Delete Table successfully when active user is zero in table");
+            // logger.info("Delete Table successfully when active user is zero in table");
         }
     } catch (error) {
-        logger.error(`Socket Disconnect Error ${error}`)
+        logger.error(`SOCKET_DISCONNECT TIME ERROR :::: ${error}`)
     }
 }
 

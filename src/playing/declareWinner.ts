@@ -6,8 +6,7 @@ import { reStart } from "../bull/queue/reStart";
 
 const declareWinner = async (data: any) => {
     try {
-        logger.info(`Data is Winner::::::: ${JSON.stringify(data)}`)
-        console.log("Declare Winner Data", data)
+        logger.info(`DECLARE_WINNWE DATA :::: ${JSON.stringify(data)}`)
         if (data.symbol == "TIE") {
             let tableId = data.tableId
             await Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE", winnerUserId: data.userId })
@@ -46,8 +45,7 @@ const declareWinner = async (data: any) => {
             return await reStart(data.data)
         }
     } catch (error) {
-        console.log("Winner Error:", error)
-        logger.error("Winner Error:", error)
+        logger.error("DECLARE_WINNWE ERROR ::::", error)
     }
 }
 
@@ -56,8 +54,7 @@ const deleteTable = async (tableId: String) => {
     try {
         await Table.findByIdAndDelete(tableId)
     } catch (error) {
-        console.log("winner Delete Table Error", error)
-        logger.error("winner Delete Table Error", error)
+        logger.error("WINNER_TABLE_DELETE_ERROR", error)
     }
 }
 

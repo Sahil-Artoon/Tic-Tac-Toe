@@ -6,7 +6,7 @@ import { logger } from "../logger";
 
 const checkTurn = async (data: any) => {
     try {
-        logger.info(`CheckTurn Data :::${JSON.stringify(data.tableId)}`)
+        logger.info(`CHECK_TURN DATA :::: ${JSON.stringify(data.tableId)}`)
         // RandomeTurn
         const randomNumber = Math.floor(Math.random() * 100) + 1;
         let ramdomNumberForGiveUserTurn;
@@ -37,8 +37,7 @@ const checkTurn = async (data: any) => {
         }
 
     } catch (error) {
-        console.log("checkTurn Error: ", error)
-        logger.error("checkTurn Error: ", error)
+        logger.error("CHECK_TURN ERROR :::: ", error)
     }
 }
 
