@@ -337,6 +337,17 @@ const leaveGame = (data) => {
             document.querySelector('#all-game').style.display = 'none';
         }
     }
+    if (data.gameStatus == "CHECK_TURN") {
+        if (data.message == "ok") {
+            if (data.userId == userId) {
+                document.querySelector('.form-container').style.display = 'block'
+                document.getElementById('leave-button').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'none';
+            } else {
+                disableBoard('wating')
+            }
+        }
+    }
 }
 
 const disableLeaveButton = (data) => {

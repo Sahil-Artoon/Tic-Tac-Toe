@@ -1,7 +1,6 @@
 import Queue from "bull"
 import { QUEUE_EVENT } from "../../constant/queueConstant";
 import { redisOption } from "../../connection/redisConnection";
-import { log } from "winston";
 
 
 const queue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
