@@ -97,16 +97,6 @@ const joinGame = async (data: any, socket: Socket) => {
                         tableId: updateTable._id,
                         time: 11000
                     }
-                    setTimeout(() => {
-                        let data = {
-                            eventName: "LEAVE_BUTTON",
-                            data: {
-                                _id: currentTable._id.toString(),
-                                message: "ok"
-                            }
-                        }
-                        sendToRoomEmmiter(data)
-                    }, 6000)
                     await roundTimer(data)
                 }
             }

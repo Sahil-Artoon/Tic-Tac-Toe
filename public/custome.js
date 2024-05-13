@@ -6,6 +6,7 @@ let play = false
 var symbol;
 var userName;
 var tableId;
+let seconds;
 
 const currentUser = getSession("CurrentUser")
 
@@ -149,7 +150,7 @@ const roundTimer = (data) => {
         tableId = data.data._id;
         // Start the timer
         const timerElement = document.getElementById('winner');
-        let seconds = data.roundTimer;
+        seconds = data.roundTimer;
         function updateTimer() {
             timerElement.textContent = `Game Start in ${seconds}`;
             seconds--;
@@ -196,14 +197,28 @@ const changeTurn = (data) => {
 const declareWinner = (data) => {
     console.log(`Data of DeclareWinner is :::${JSON.stringify(data)}`)
     if (data.message == "Winner") {
-        document.getElementById('leave-button').style.display = "none"
-        if (data.symbol == symbol) {
-            document.getElementById('winner').innerHTML = `${userName} You Win`;
-            document.querySelector(".board").classList.add("disabled");
+        if (data.isLeave == true) {
+            if (data.userId != userId) {
+                document.querySelector('.form-container').style.display = 'block'
+                document.getElementById('leave-button').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'none';
+                reStart()
+            } else {
+                document.getElementById('winner').innerHTML = `${userName} You Win`;
+                document.querySelector(".board").classList.add("disabled");
+            }
+
         }
-        if (data.symbol != symbol) {
-            document.getElementById('winner').innerHTML = `${userName} You Lose`;
-            document.querySelector(".board").classList.add("disabled");
+        else {
+            document.getElementById('leave-button').style.display = "none"
+            if (data.symbol == symbol) {
+                document.getElementById('winner').innerHTML = `${userName} You Win`;
+                document.querySelector(".board").classList.add("disabled");
+            }
+            if (data.symbol != symbol) {
+                document.getElementById('winner').innerHTML = `${userName} You Lose`;
+                document.querySelector(".board").classList.add("disabled");
+            }
         }
     }
     if (data.message == "TIE") {
@@ -245,6 +260,9 @@ const reJoinGame = (data) => {
             function updateTimer() {
                 timerElement.textContent = `Game Start in ${seconds}`;
                 seconds--;
+                if (clearTime == true) {
+                    clearInterval(timerInterval);
+                }
                 if (seconds < 0) {
                     clearInterval(timerInterval);
                 }
@@ -335,36 +353,48 @@ const leaveGame = (data) => {
             document.querySelector('.form-container').style.display = 'block'
             document.getElementById('leave-button').style.display = 'none'
             document.querySelector('#all-game').style.display = 'none';
+            reStart()
         }
     }
-    if (data.gameStatus == "CHECK_TURN") {
+
+    if (data.gameStatus == "ROUND_TIMER") {
         if (data.message == "ok") {
             if (data.userId == userId) {
                 document.querySelector('.form-container').style.display = 'block'
                 document.getElementById('leave-button').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'none';
+                reStart()
             } else {
-                disableBoard('wating')
+                seconds = 0
+                setTimeout(()=>{
+                    disableBoard("Waiting")
+                },1000)
+            }
+        }
+    }
+
+    if (data.gameStatus == "CHECK_TURN") {
+        if (data.message == "ok") {
+            if (data.tableData.playerInfo[0].userId != userId) {
+                document.querySelector('.form-container').style.display = 'block'
+                document.getElementById('leave-button').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'none';
+                reStart()
+            } else {
+                disableBoard("Waiting")
             }
         }
     }
 }
 
-const disableLeaveButton = (data) => {
-    console.log("EvenetName is LEAVE_BUTTON :::::", data);
-    if (data.message == "ok") {
-        document.getElementById('leave-button').style.display = 'none'
-    }
-}
 
 const reStart = (data) => {
-    console.log("EvenetName is reStart :::::", data);
     sessionStorage.clear();
     window.location.reload();
 }
 
 const sendEmmiter = (data) => {
-    console.log(`EventName IS:::${data.eventName} and Data is ${JSON.stringify(data.data)}`)
+    console.log(`EventName IS ::: ${data.eventName} and Data is ${JSON.stringify(data.data)}`)
     socket.emit(data.eventName, data.data)
 }
 
@@ -404,10 +434,6 @@ socket.onAny((eventName, data) => {
         case "LEAVE_GAME":
             leaveGame(data)
             break;
-        case "LEAVE_BUTTON":
-            disableLeaveButton(data)
-            break;
-
         default:
             break;
     }

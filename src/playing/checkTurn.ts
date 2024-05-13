@@ -15,7 +15,6 @@ const checkTurn = async (data: any) => {
         } else {
             ramdomNumberForGiveUserTurn = 0;
         }
-        console.log(`Random number is::::${1}`)
         let dataOfTable = await Table.findById(data.tableId)
         if (dataOfTable) {
             await Table.findByIdAndUpdate(dataOfTable._id, {
@@ -23,7 +22,6 @@ const checkTurn = async (data: any) => {
                 currentTurnUserId: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
                 gameStatus: "CHECK_TURN"
             })
-            console.log("Check Turn Room id::::", dataOfTable._id)
             data = {
                 eventName: EVENT_NAME.CHECK_TURN,
                 data: {

@@ -50,6 +50,7 @@ const playGame = async (data: any, socket: Socket) => {
                         tableId: findTableForCheckWinner._id,
                         userId: data.data.userId,
                         symbol: "X",
+                        isLeave:false
                     }
                     return await declareWinner(data)
                 } else if (checkWinnerorNot == "TIE") {
@@ -117,6 +118,7 @@ const playGame = async (data: any, socket: Socket) => {
                         tableId: findTableForCheckWinner._id,
                         userId: data.data.userId,
                         symbol: "O",
+                        isLeave:false
                     }
                     return await declareWinner(data)
                 } else if (checkWinnerorNot == "TIE") {

@@ -3,30 +3,29 @@ import { logger } from "../../logger";
 import { redisOption } from "../../connection/redisConnection";
 import { checkTurn } from "../../playing/checkTurn";
 import { QUEUE_EVENT } from "../../constant/queueConstant";
+import { log } from "winston";
 
-const roundTimer = (data: any) => {
+const roundTimer = async (data: any) => {
     try {
         const tableId: any = data.tableId
-        console.log("current table Id is ::::", tableId)
         let roundTimerQueue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
         let options = {
             jobId: tableId.toString(),
             delay: data.time,
             attempts: 1
         }
-        console.log("Options:::::::", options)
         roundTimerQueue.add(data, options)
-        roundTimerQueue.process((data: any) => {
+        roundTimerQueue.process(async (data: any) => {
+            console.log("This is in Process ::::::::::::::", data.data)
             data = {
-                tableId: data.data.tableId
+                tableId: data.data.tableId.toString(),
             }
-            setTimeout(() =>{
+            await setTimeout(() => {
                 checkTurn(data)
-            },1000)
+            }, 1000)
         })
     } catch (error) {
-        console.log("Queue RoundTimer Error :::", error)
-        logger.error("Queue RoundTimer Error :::", error)
+        logger.error("ROUND_TIMER QUEUE ERROR :::", error)
     }
 }
 

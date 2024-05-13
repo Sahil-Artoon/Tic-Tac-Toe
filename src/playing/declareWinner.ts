@@ -34,6 +34,8 @@ const declareWinner = async (data: any) => {
                     _id: data.tableId.toString(),
                     message: "Winner",
                     symbol: data.symbol,
+                    userId: data.userId,
+                    isLeave: data.isLeave,
                     timer: 5000
                 },
             }

@@ -13,7 +13,6 @@ const getJob = async (jobId: any) => {
             const timestramptime = currentTime - enqueueTime;
             let timePassed = Math.floor(timestramptime / 1000)
             let penddingTime = job.data.time - (timePassed * 1000)
-            console.log("This is pending Time :::::", penddingTime)
             return penddingTime;
         } else {
             console.log('THIS IS JOB EMPTY AT ROUNDTIMER_STRAT TIME::::');
