@@ -366,9 +366,10 @@ const leaveGame = (data) => {
                 reStart()
             } else {
                 seconds = 0
-                setTimeout(()=>{
+                setTimeout(() => {
                     disableBoard("Waiting")
-                },1000)
+                }, 1000)
+                document.getElementById('leave-button').style.display = 'block'
             }
         }
     }
@@ -387,6 +388,13 @@ const leaveGame = (data) => {
     }
 }
 
+const disableLeaveButton = (data) => {
+    console.log("EvenetName is LEAVE_BUTTON :::::", data);
+    if (data.message == "ok") {
+        if (document.getElementById('winner').innerHTML != "Waiting")
+            document.getElementById('leave-button').style.display = 'none'
+    }
+}
 
 const reStart = (data) => {
     sessionStorage.clear();
@@ -433,6 +441,9 @@ socket.onAny((eventName, data) => {
             break;
         case "LEAVE_GAME":
             leaveGame(data)
+            break;
+        case "LEAVE_BUTTON":
+            disableLeaveButton(data)
             break;
         default:
             break;

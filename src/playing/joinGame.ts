@@ -51,13 +51,19 @@ const joinGame = async (data: any, socket: Socket) => {
                 }
                 return sendToSocketIdEmmiter(data);
             }
+            let symbol;
+            if (checkTable.playerInfo[0].symbol == "X") {
+                symbol = "O"
+            } else {
+                symbol = "X"
+            }
             let updateTable = await Table.findByIdAndUpdate({ _id: checkTable._id }, {
                 $push: {
                     playerInfo: {
                         userId: findUser._id,
                         userName: findUser.userName,
                         isActive: true,
-                        symbol: "O"
+                        symbol: symbol
                     }
                 },
                 activePlayer: 2,
@@ -97,6 +103,16 @@ const joinGame = async (data: any, socket: Socket) => {
                         tableId: updateTable._id,
                         time: 11000
                     }
+                    setTimeout(() => {
+                        let data = {
+                            eventName: "LEAVE_BUTTON",
+                            data: {
+                                _id: currentTable._id.toString(),
+                                message: "ok"
+                            }
+                        }
+                        sendToRoomEmmiter(data)
+                    }, 6000)
                     await roundTimer(data)
                 }
             }
