@@ -78,6 +78,29 @@ function enableBoard() {
     // document.querySelector('#winner').innerHTML = 'Waiting for Opponent'
 }
 
+// ::::: This is for Timer Function ::::::
+const timerForTurn = (start, time) => {
+    console.log("Secound is :::::::::::::", data)
+    let milliseconds
+    const timerElement = document.getElementById('timer');
+    if (start == 0) {
+        milliseconds = start;
+    } else {
+        milliseconds = time - start
+    }
+    let intervalId;
+    let endTimer = time
+    function updateTimer() {
+        milliseconds += 100;
+        const time = new Date(milliseconds).toISOString().substr(11, 12);
+        timerElement.textContent = time;
+        if (milliseconds >= endTimer) {
+            clearInterval(intervalId);
+            timerElement.textContent = '00:00:10.000';
+        }
+    }
+    intervalId = setInterval(updateTimer, 100);
+}
 
 // :::::::::::::: Session Functions ::::::::::::::
 function setSession(key, value) {
@@ -170,9 +193,12 @@ const checkTurn = (data) => {
         if (data.symbol == symbol) {
             enableBoard()
             document.getElementById('winner').innerHTML = "It's your Turn.";
+            document.getElementById('main-timer').style.display = "block"
+            timerForTurn(0, data.time)
         }
         if (data.symbol != symbol) {
             disableBoard('Aponent Turn.')
+            document.getElementById('main-timer').style.display = "none"
         }
     }
 }
@@ -189,14 +215,18 @@ const changeTurn = (data) => {
     if (data.data.symbol == symbol) {
         enableBoard()
         document.getElementById('winner').innerHTML = "It's your Turn.";
+        document.getElementById('main-timer').style.display = "block"
+        timerForTurn(0, data.time)
     }
     if (data.data.symbol != symbol) {
         disableBoard('Aponent Turn.')
+        document.getElementById('main-timer').style.display = "none"
     }
 }
 const declareWinner = (data) => {
     console.log(`Data of DeclareWinner is :::${JSON.stringify(data)}`)
     if (data.message == "Winner") {
+        document.getElementById('main-timer').style.display = "none"
         if (data.isLeave == true) {
             if (data.userId != userId) {
                 document.querySelector('.form-container').style.display = 'block'
@@ -224,6 +254,7 @@ const declareWinner = (data) => {
     if (data.message == "TIE") {
         document.getElementById('leave-button').style.display = "none"
         document.getElementById('winner').innerHTML = "IT'S TIE";
+        document.getElementById('main-timer').style.display = "none"
         document.querySelector(".board").classList.add("disabled");
     }
 }
@@ -236,6 +267,7 @@ const reJoinGame = (data) => {
             userId = data.data.userData.userId;
             userName = data.data.userData.userName;
             document.querySelector('.form-container').style.display = 'none'
+            document.getElementById('main-timer').style.display = "none"
             document.getElementById('leave-button').style.display = 'block'
             document.querySelector('#all-game').style.display = 'block';
             document.querySelector('#currentUserName').innerHTML = userName
@@ -247,6 +279,7 @@ const reJoinGame = (data) => {
             userName = data.data.userData.userName;
             tableId = data.data.tableId;
             document.querySelector('.form-container').style.display = 'none'
+            document.getElementById('main-timer').style.display = "none"
             document.querySelector('#all-game').style.display = 'block';
             document.querySelector('#currentUserName').innerHTML = userName
             disableBoard('');
@@ -275,6 +308,7 @@ const reJoinGame = (data) => {
             userName = data.data.userData.userName;
             tableId = data.data.tableId;
             document.querySelector('.form-container').style.display = 'none'
+            document.getElementById('main-timer').style.display = "none"
             document.querySelector('#all-game').style.display = 'block';
             document.querySelector('#currentUserName').innerHTML = userName
             disableBoard('');
@@ -308,10 +342,13 @@ const reJoinGame = (data) => {
                 document.querySelector('#all-game').style.display = 'block';
                 enableBoard()
                 document.getElementById('winner').innerHTML = "It's your Turn.";
+                document.getElementById('main-timer').style.display = "block"
+                timerForTurn(data.pandingTime, data.time)
             }
             if (data.tableData.currentTurnUserId != userId) {
                 document.querySelector('.form-container').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'block';
+                document.getElementById('main-timer').style.display = "none"
                 disableBoard('Aponent Turn.')
             }
         }
@@ -326,10 +363,13 @@ const reJoinGame = (data) => {
                 document.querySelector('#all-game').style.display = 'block';
                 enableBoard()
                 document.getElementById('winner').innerHTML = "It's your Turn.";
+                document.getElementById('main-timer').style.display = "block"
+                timerForTurn(data.pandingTime, data.time)
             }
             if (data.tableData.currentTurnUserId != userId) {
                 document.querySelector('.form-container').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'block';
+                document.getElementById('main-timer').style.display = "none"
                 disableBoard('Aponent Turn.')
             }
             for (let i = 0; i < data.tableData.playingData.length; i++) {

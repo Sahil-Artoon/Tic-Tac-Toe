@@ -236,3 +236,21 @@ input[type="submit"]:hover {
 #leave-button:hover {
   background-color: #d00;
 }
+
+/* This is for Timer */
+.timer-container {
+  text-align: center;
+}
+
+.timer {
+  font-size: 36px;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  animation: pulse 1s infinite alternate;
+}
+#main-timer{
+  display: none;
+}

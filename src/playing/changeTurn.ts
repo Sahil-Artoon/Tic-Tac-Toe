@@ -4,13 +4,14 @@ import { EVENT_NAME } from "../constant/eventName";
 import { sendToRoomEmmiter } from "../eventEmmitter";
 import { turnTimer } from "../bull/queue/turnTimer";
 import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue";
+import { TIMER } from "../constant/timerConstant";
 
 const changeTurn = async (data: any) => {
     try {
         logger.info(`CHANGE_TURN DATA :::: ${JSON.stringify(data)}`);
         let findTable = await Table.findById(data.tableId)
         if (findTable) {
-            if (findTable.currentTurnSeatIndex == "0") {
+            if (findTable.currentTurnSeatIndex == 0) {
                 let updateTable = await Table.findByIdAndUpdate(findTable._id, {
                     currentTurnSeatIndex: "1",
                     currentTurnUserId: findTable.playerInfo[1].userId
@@ -21,7 +22,8 @@ const changeTurn = async (data: any) => {
                         _id: updateTable?._id.toString(),
                         data: updateTable?.playerInfo[1],
                         userId: updateTable?.playerInfo[1].userId,
-                        symbol: updateTable?.playerInfo[1].symbol
+                        symbol: updateTable?.playerInfo[1].symbol,
+                        time: TIMER.TURN_TIMER
                     }
                 }
                 sendToRoomEmmiter(data)
@@ -29,18 +31,18 @@ const changeTurn = async (data: any) => {
                 if (result == true) {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: 10000
+                        time: TIMER.TURN_TIMER + 2
                     }
                     await turnTimer(data)
                 } else {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: 10000
+                        time: TIMER.TURN_TIMER + 2
                     }
                     await turnTimer(data)
                 }
             }
-            if (findTable.currentTurnSeatIndex == "1") {
+            if (findTable.currentTurnSeatIndex == 1) {
                 let updateTable = await Table.findByIdAndUpdate(findTable._id, {
                     currentTurnSeatIndex: "0",
                     currentTurnUserId: findTable.playerInfo[0].userId
@@ -51,7 +53,8 @@ const changeTurn = async (data: any) => {
                         _id: updateTable?._id.toString(),
                         data: updateTable?.playerInfo[0],
                         userId: updateTable?.playerInfo[0].userId,
-                        symbol: updateTable?.playerInfo[0].symbol
+                        symbol: updateTable?.playerInfo[0].symbol,
+                        time: TIMER.TURN_TIMER
                     }
                 }
                 sendToRoomEmmiter(data)
@@ -59,13 +62,13 @@ const changeTurn = async (data: any) => {
                 if (result == true) {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: 10000
+                        time: TIMER.TURN_TIMER + 2
                     }
                     await turnTimer(data)
                 } else {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: 10000
+                        time: TIMER.TURN_TIMER + 2
                     }
                     await turnTimer(data)
                 }

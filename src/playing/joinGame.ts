@@ -64,7 +64,8 @@ const joinGame = async (data: any, socket: Socket) => {
                         userId: findUser._id,
                         userName: findUser.userName,
                         isActive: true,
-                        symbol: symbol
+                        symbol: symbol,
+                        turnMiss: 0
                     }
                 },
                 activePlayer: 2,
@@ -118,7 +119,8 @@ const joinGame = async (data: any, socket: Socket) => {
                     userId: findUser._id,
                     userName: findUser.userName,
                     isActive: true,
-                    symbol: "X"
+                    symbol: "X",
+                    turnMiss: 0
                 }],
                 playingData: [
                     { userId: "", symbol: "" },
@@ -133,8 +135,8 @@ const joinGame = async (data: any, socket: Socket) => {
                 ],
                 activePlayer: 1,
                 gameStatus: "WATING",
-                currentTurnSeatIndex: "",
-                currentTurnUserId: ""
+                currentTurnSeatIndex: null,
+                currentTurnUserId: null
             })
             await User.findByIdAndUpdate(generateTable.playerInfo[0].userId, { $set: { tableId: generateTable._id.toString() } });
             if (generateTable) {

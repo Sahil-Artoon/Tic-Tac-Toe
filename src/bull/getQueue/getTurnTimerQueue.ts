@@ -3,7 +3,7 @@ import { redisOption } from "../../connection/redisConnection";
 import { QUEUE_EVENT } from "../../constant/queueConstant";
 
 const queue = new Queue(QUEUE_EVENT.TURN_TIMER, redisOption);
-const turnTimerQueue = async (jobId: any) => {
+const getTurnTimerQueue = async (jobId: any) => {
     try {
         const job = await queue.getJob(jobId);
         if (job) {
@@ -21,4 +21,4 @@ const turnTimerQueue = async (jobId: any) => {
     }
 }
 
-export { turnTimerQueue }
+export { getTurnTimerQueue }

@@ -7,7 +7,8 @@ import { EVENT_NAME } from "../constant/eventName";
 import { eventHandler } from "../eventHandler";
 import { getJob } from "../bull/getQueue/getRoundTimerQueue";
 import { validateRejoinData } from "../validation/rejoinValidation";
-import { leaveGame } from "./leaveGame";
+import { getTurnTimerQueue } from "../bull/getQueue/getTurnTimerQueue";
+import { TIMER } from "../constant/timerConstant";
 
 const reJoinGame = async (data: any, socket: Socket) => {
     try {
@@ -97,7 +98,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                     }
                 }
                 if (findTable.gameStatus == "LOCK") {
-                    const getpanddingTime: any = await getJob(findTable._id.toString())
+                    let getpanddingTime: any = await getJob(findTable._id.toString())
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
@@ -112,13 +113,17 @@ const reJoinGame = async (data: any, socket: Socket) => {
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "CHECK_TURN") {
+                    let getpanddingTime: any = await getTurnTimerQueue(findTable._id.toString())
+                    console.log("Get pandding time: ", getpanddingTime)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
                             gameStatus: findTable.gameStatus,
                             data,
                             tableData: findTable,
-                            message: "ok"
+                            message: "ok",
+                            pandingTime: getpanddingTime,
+                            time: TIMER.TURN_TIMER
                         },
                         socket
                     }
@@ -126,13 +131,17 @@ const reJoinGame = async (data: any, socket: Socket) => {
                 }
 
                 if (findTable.gameStatus == "PLAYING") {
+                    let getpanddingTime: any = await getTurnTimerQueue(findTable._id.toString())
+                    console.log("Get pandding time: ", getpanddingTime)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
                             gameStatus: findTable.gameStatus,
                             data,
                             tableData: findTable,
-                            message: "ok"
+                            message: "ok",
+                            pandingTime: getpanddingTime,
+                            time: TIMER.TURN_TIMER
                         },
                         socket
                     }

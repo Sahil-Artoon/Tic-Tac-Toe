@@ -1,10 +1,10 @@
-import { Socket } from "socket.io";
 import { sendToRoomEmmiter } from "../eventEmmitter";
 import { EVENT_NAME } from "../constant/eventName";
 import { Table } from "../model/tableModel";
 import { logger } from "../logger";
 import { turnTimer } from "../bull/queue/turnTimer";
-import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue";
+import { TIMER } from "../constant/timerConstant";
+import { declareWinner } from "./declareWinner";
 
 const checkTurn = async (data: any) => {
     try {
@@ -18,28 +18,66 @@ const checkTurn = async (data: any) => {
             ramdomNumberForGiveUserTurn = 0;
         }
         let dataOfTable = await Table.findById(data.tableId)
-        if (dataOfTable) {
-            await Table.findByIdAndUpdate(dataOfTable._id, {
+        if (dataOfTable?.currentTurnSeatIndex == null || dataOfTable?.currentTurnUserId == "") {
+            await Table.findByIdAndUpdate(dataOfTable?._id, {
                 currentTurnSeatIndex: ramdomNumberForGiveUserTurn,
-                currentTurnUserId: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
+                currentTurnUserId: dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].userId,
                 gameStatus: "CHECK_TURN"
             })
             data = {
                 eventName: EVENT_NAME.CHECK_TURN,
                 data: {
-                    _id: dataOfTable._id.toString(),
-                    symbol: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].symbol,
-                    userID: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
+                    _id: dataOfTable?._id.toString(),
+                    symbol: dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].symbol,
+                    userID: dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].userId,
+                    time: TIMER.TURN_TIMER,
                     message: "ok"
                 }
             }
             sendToRoomEmmiter(data)
             data = {
                 tableId: dataOfTable?._id.toString(),
-                time: 10000
+                time: TIMER.TURN_TIMER + 2
             }
             await turnTimer(data)
             return 0
+        } else {
+            if (dataOfTable?.currentTurnSeatIndex == 0) {
+                if (dataOfTable?.playerInfo[0]?.turnMiss < 3) {
+                    await Table.findByIdAndUpdate(dataOfTable?._id, {
+                        currentTurnSeatIndex: 1,
+                        currentTurnUserId: dataOfTable?.playerInfo[1].userId,
+                        gameStatus: "CHECK_TURN",
+                        $set: {
+                            "playerInfo[0].turnMiss": { $inc: 1 }
+                        }
+                    })
+                } else {
+                    data = {
+                        tableId: dataOfTable?._id.toString(),
+                        userId: dataOfTable?.playerInfo[1]?.userId
+                    }
+                    return await declareWinner(data)
+                }
+            }
+            if (dataOfTable?.currentTurnSeatIndex == 1) {
+                if (dataOfTable?.playerInfo[1]?.turnMiss < 3) {
+                    await Table.findByIdAndUpdate(dataOfTable?._id, {
+                        currentTurnSeatIndex: 0,
+                        currentTurnUserId: dataOfTable?.playerInfo[0].userId,
+                        gameStatus: "CHECK_TURN",
+                        $set: {
+                            "playerInfo[1].turnMiss": { $inc: 1 }
+                        }
+                    })
+                } else {
+                    data = {
+                        tableId: dataOfTable?._id.toString(),
+                        userId: dataOfTable?.playerInfo[0]?.userId
+                    }
+                    return await declareWinner(data)
+                }
+            }
         }
 
     } catch (error) {
