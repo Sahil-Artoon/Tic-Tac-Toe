@@ -2,6 +2,8 @@ import { logger } from "../logger";
 import { Table } from "../model/tableModel";
 import { EVENT_NAME } from "../constant/eventName";
 import { sendToRoomEmmiter } from "../eventEmmitter";
+import { turnTimer } from "../bull/queue/turnTimer";
+import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue";
 
 const changeTurn = async (data: any) => {
     try {
@@ -22,7 +24,21 @@ const changeTurn = async (data: any) => {
                         symbol: updateTable?.playerInfo[1].symbol
                     }
                 }
-                return sendToRoomEmmiter(data)
+                sendToRoomEmmiter(data)
+                let result = await cancleTurnTimerJob(updateTable?._id.toString())
+                if (result == true) {
+                    data = {
+                        tableId: updateTable?._id.toString(),
+                        time: 10000
+                    }
+                    await turnTimer(data)
+                } else {
+                    data = {
+                        tableId: updateTable?._id.toString(),
+                        time: 10000
+                    }
+                    await turnTimer(data)
+                }
             }
             if (findTable.currentTurnSeatIndex == "1") {
                 let updateTable = await Table.findByIdAndUpdate(findTable._id, {
@@ -38,7 +54,21 @@ const changeTurn = async (data: any) => {
                         symbol: updateTable?.playerInfo[0].symbol
                     }
                 }
-                return sendToRoomEmmiter(data)
+                sendToRoomEmmiter(data)
+                let result = await cancleTurnTimerJob(updateTable?._id.toString())
+                if (result == true) {
+                    data = {
+                        tableId: updateTable?._id.toString(),
+                        time: 10000
+                    }
+                    await turnTimer(data)
+                } else {
+                    data = {
+                        tableId: updateTable?._id.toString(),
+                        time: 10000
+                    }
+                    await turnTimer(data)
+                }
             }
         }
     } catch (error) {

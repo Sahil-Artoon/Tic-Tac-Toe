@@ -14,20 +14,23 @@ const logger_1 = require("../logger");
 const eventEmmitter_1 = require("../eventEmmitter");
 const userModel_1 = require("../model/userModel");
 const eventName_1 = require("../constant/eventName");
+const signUpValidation_1 = require("../validation/signUpValidation");
 const signUp = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
-    logger_1.logger.info(`signUp:::Data: ${JSON.stringify(data)} and Socket Id::: ${socket.id}`);
+    var _a;
+    logger_1.logger.info(`SIGN_UP EVENT DATA :::: ${JSON.stringify(data)}`);
     try {
-        let { userName } = data;
-        if (!userName) {
+        let checkData = yield (0, signUpValidation_1.signUpValidation)(data);
+        if (checkData.error) {
             data = {
-                eventName: eventName_1.EVENT_NAME.SIGN_UP,
+                eventName: eventName_1.EVENT_NAME.POP_UP,
                 data: {
-                    message: "Can't get UserName"
+                    message: (_a = checkData.error) === null || _a === void 0 ? void 0 : _a.details[0].message
                 },
                 socket
             };
             return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
         }
+        let { userName } = data;
         let checkUserIsExistOrNot = yield userModel_1.User.findOne({ userName });
         if (!checkUserIsExistOrNot) {
             let newUser = yield userModel_1.User.create({
@@ -58,7 +61,7 @@ const signUp = (data, socket) => __awaiter(void 0, void 0, void 0, function* () 
         }
     }
     catch (error) {
-        logger_1.logger.error(`SignUp User Error::${error}`);
+        logger_1.logger.error(`SIGN_UP ERROR :::: ${error}`);
     }
 });
 exports.signUp = signUp;

@@ -17,8 +17,8 @@ const disconnect = (socket) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const getCurrentUser = yield userModel_1.User.findOne({ socketId: socket.id });
         if (getCurrentUser) {
-            const updateUserSocketId = yield userModel_1.User.findOneAndUpdate({ socketId: socket.id }, { socketId: '' });
-            logger_1.logger.info("Update SocketId successfully At Disconnect Time !!!");
+            yield userModel_1.User.findOneAndUpdate({ socketId: socket.id }, { socketId: '', tableId: "" });
+            // logger.info("Update SocketId successfully At Disconnect Time !!!")
         }
         // const findInTable = await Table.findOne({ "playerInfo.socketId": socket.id })
         // if (findInTable) {
@@ -35,11 +35,11 @@ const disconnect = (socket) => __awaiter(void 0, void 0, void 0, function* () {
             checkTable.map((item) => __awaiter(void 0, void 0, void 0, function* () {
                 yield tableModel_1.Table.findByIdAndDelete({ _id: item._id });
             }));
-            logger_1.logger.info("Delete Table successfully when active user is zero in table");
+            // logger.info("Delete Table successfully when active user is zero in table");
         }
     }
     catch (error) {
-        logger_1.logger.error(`Socket Disconnect Error ${error}`);
+        logger_1.logger.error(`SOCKET_DISCONNECT TIME ERROR :::: ${error}`);
     }
 });
 exports.disconnect = disconnect;

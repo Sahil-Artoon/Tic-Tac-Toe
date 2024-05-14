@@ -8,10 +8,12 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const userSchema = new mongoose_1.default.Schema({
     userName: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     socketId: {
+        type: String
+    },
+    tableId: {
         type: String
     }
 }, { timestamps: true });

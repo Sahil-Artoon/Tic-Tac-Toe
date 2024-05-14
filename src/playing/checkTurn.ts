@@ -3,6 +3,8 @@ import { sendToRoomEmmiter } from "../eventEmmitter";
 import { EVENT_NAME } from "../constant/eventName";
 import { Table } from "../model/tableModel";
 import { logger } from "../logger";
+import { turnTimer } from "../bull/queue/turnTimer";
+import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue";
 
 const checkTurn = async (data: any) => {
     try {
@@ -32,6 +34,12 @@ const checkTurn = async (data: any) => {
                 }
             }
             sendToRoomEmmiter(data)
+            data = {
+                tableId: dataOfTable?._id.toString(),
+                time: 10000
+            }
+            await turnTimer(data)
+            return 0
         }
 
     } catch (error) {

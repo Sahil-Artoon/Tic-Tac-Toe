@@ -25,18 +25,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
             return sendToSocketIdEmmiter(data);
         }
         let findTable = await Table.findById(data.tableId)
-        // if (!findTable) {
-        //     data = {
-        //         eventName: EVENT_NAME.POP_UP,
-        //         data: {
-        //             message: "Can't found record !!!"
-        //         },
-        //         socket
-        //     }
-        //     return sendToSocketIdEmmiter(data);
-        // }
         if (findTable) {
-            // console.log("This is Rejoin Table ::::", findTable)
             if (findTable.playerInfo.length == 1) {
                 console.log("This is One Player", findTable.playerInfo)
                 if (findTable.playerInfo[0].userId == data.userData.userId) {
@@ -106,6 +95,21 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         }
                         return sendToSocketIdEmmiter(data)
                     }
+                }
+                if (findTable.gameStatus == "LOCK") {
+                    const getpanddingTime: any = await getJob(findTable._id.toString())
+                    data = {
+                        eventName: EVENT_NAME.REJOIN_GAME,
+                        data: {
+                            gameStatus: findTable.gameStatus,
+                            data,
+                            time: getpanddingTime,
+                            message: "ok",
+                            leaveButton: false,
+                        },
+                        socket
+                    }
+                    return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "CHECK_TURN") {
                     data = {

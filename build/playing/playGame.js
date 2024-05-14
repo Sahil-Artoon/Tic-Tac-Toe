@@ -17,9 +17,22 @@ const eventEmmitter_1 = require("../eventEmmitter");
 const checkWinner_1 = require("./checkWinner");
 const declareWinner_1 = require("./declareWinner");
 const changeTurn_1 = require("./changeTurn");
+const playGameValidation_1 = require("../validation/playGameValidation");
 const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        logger_1.logger.info(`THis is Play Data:::::::${JSON.stringify(data)} and Socket is ::::: ${socket.id}`);
+        logger_1.logger.info(`PLAY_GAME EVENT DATA :::: ${JSON.stringify(data)}`);
+        let checkData = yield (0, playGameValidation_1.validatePlayGameData)(data);
+        if (checkData.error) {
+            data = {
+                eventName: eventName_1.EVENT_NAME.POP_UP,
+                data: {
+                    message: (_a = checkData.error) === null || _a === void 0 ? void 0 : _a.details[0].message
+                },
+                socket
+            };
+            return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
+        }
         if (data.sign == "X") {
             // This is for Play
             yield tableModel_1.Table.findByIdAndUpdate(data.tableId, { gameStatus: "PLAYING" });
@@ -47,6 +60,7 @@ const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                         tableId: findTableForCheckWinner._id,
                         userId: data.data.userId,
                         symbol: "X",
+                        isLeave: false
                     };
                     return yield (0, declareWinner_1.declareWinner)(data);
                 }
@@ -114,6 +128,7 @@ const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                         tableId: findTableForCheckWinner._id,
                         userId: data.data.userId,
                         symbol: "O",
+                        isLeave: false
                     };
                     return yield (0, declareWinner_1.declareWinner)(data);
                 }
@@ -156,8 +171,7 @@ const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
         }
     }
     catch (error) {
-        console.log("PlayGame Error: ", error);
-        logger_1.logger.error("PlayGame Error: ", error);
+        logger_1.logger.error("PLAY_GAME ERROR: ", error);
     }
 });
 exports.playGame = playGame;

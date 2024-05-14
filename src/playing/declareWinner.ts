@@ -21,7 +21,7 @@ const declareWinner = async (data: any) => {
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, (60000 * 2))
+            }, (20000))
             sendToRoomEmmiter(data)
             return await reStart(data.data)
         }
@@ -41,7 +41,7 @@ const declareWinner = async (data: any) => {
             }
             setTimeout(() => {
                 deleteTable(tableId)
-            }, (60000 * 2))
+            }, (20000))
 
             sendToRoomEmmiter(data)
             return await reStart(data.data)

@@ -16,11 +16,16 @@ const tableModel_1 = require("../model/tableModel");
 const logger_1 = require("../logger");
 const checkTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        logger_1.logger.info(`CheckTurn Data :::${JSON.stringify(data.tableId)}`);
+        logger_1.logger.info(`CHECK_TURN DATA :::: ${JSON.stringify(data.tableId)}`);
         // RandomeTurn
-        const randomNumber = Math.random();
-        const ramdomNumberForGiveUserTurn = Math.round(randomNumber);
-        console.log(`Random number is::::${ramdomNumberForGiveUserTurn}`);
+        const randomNumber = Math.floor(Math.random() * 100) + 1;
+        let ramdomNumberForGiveUserTurn;
+        if (randomNumber % 2 == 1) {
+            ramdomNumberForGiveUserTurn = 1;
+        }
+        else {
+            ramdomNumberForGiveUserTurn = 0;
+        }
         let dataOfTable = yield tableModel_1.Table.findById(data.tableId);
         if (dataOfTable) {
             yield tableModel_1.Table.findByIdAndUpdate(dataOfTable._id, {
@@ -28,7 +33,6 @@ const checkTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
                 currentTurnUserId: dataOfTable.playerInfo[ramdomNumberForGiveUserTurn].userId,
                 gameStatus: "CHECK_TURN"
             });
-            console.log("Check Turn Room id::::", dataOfTable._id);
             data = {
                 eventName: eventName_1.EVENT_NAME.CHECK_TURN,
                 data: {
@@ -42,8 +46,7 @@ const checkTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
     catch (error) {
-        console.log("checkTurn Error: ", error);
-        logger_1.logger.error("checkTurn Error: ", error);
+        logger_1.logger.error("CHECK_TURN ERROR :::: ", error);
     }
 });
 exports.checkTurn = checkTurn;

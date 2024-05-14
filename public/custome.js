@@ -256,14 +256,42 @@ const reJoinGame = (data) => {
                 document.getElementById('leave-button').style.display = "none"
             }
             const timerElement = document.getElementById('winner');
-            let seconds = (data.time / 1000) - 1;
+            let secondss = (data.time / 1000) - 1;
             function updateTimer() {
-                timerElement.textContent = `Game Start in ${seconds}`;
-                seconds--;
-                if (clearTime == true) {
+                timerElement.textContent = `Game Start in ${secondss}`;
+                secondss--;
+                if (secondss < 5) {
+                    document.getElementById('leave-button').style.display = "none"
+                }
+                if (secondss < 0) {
                     clearInterval(timerInterval);
                 }
-                if (seconds < 0) {
+            }
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+        if (data.gameStatus == "LOCK") {
+            symbol = data.data.userData.symbol;
+            userId = data.data.userData.userId;
+            userName = data.data.userData.userName;
+            tableId = data.data.tableId;
+            document.querySelector('.form-container').style.display = 'none'
+            document.querySelector('#all-game').style.display = 'block';
+            document.querySelector('#currentUserName').innerHTML = userName
+            disableBoard('');
+            if (data.leaveButton == true) {
+                document.getElementById('leave-button').style.display = "block"
+            } else {
+                document.getElementById('leave-button').style.display = "none"
+            }
+            const timerElement = document.getElementById('winner');
+            let secondss = (data.time / 1000) - 1;
+            function updateTimer() {
+                timerElement.textContent = `Game Start in ${secondss}`;
+                secondss--;
+                if (secondss < 5) {
+                    document.getElementById('leave-button').style.display = "none"
+                }
+                if (secondss < 0) {
                     clearInterval(timerInterval);
                 }
             }

@@ -16,6 +16,7 @@ const signUpUser_1 = require("../playing/signUpUser");
 const joinGame_1 = require("../playing/joinGame");
 const playGame_1 = require("../playing/playGame");
 const reJoinGame_1 = require("../playing/reJoinGame");
+const leaveGame_1 = require("../playing/leaveGame");
 const eventHandler = (socket) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         socket.onAny((eventName, data) => {
@@ -32,6 +33,9 @@ const eventHandler = (socket) => __awaiter(void 0, void 0, void 0, function* () 
                     break;
                 case eventName_1.EVENT_NAME.REJOIN_GAME:
                     (0, reJoinGame_1.reJoinGame)(data, socket);
+                    break;
+                case eventName_1.EVENT_NAME.LEAVE_GAME:
+                    (0, leaveGame_1.leaveGame)(data, socket);
                     break;
             }
         });

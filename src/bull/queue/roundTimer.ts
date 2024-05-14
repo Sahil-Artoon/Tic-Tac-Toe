@@ -3,7 +3,6 @@ import { logger } from "../../logger";
 import { redisOption } from "../../connection/redisConnection";
 import { checkTurn } from "../../playing/checkTurn";
 import { QUEUE_EVENT } from "../../constant/queueConstant";
-import { log } from "winston";
 
 const roundTimer = async (data: any) => {
     try {
@@ -16,13 +15,12 @@ const roundTimer = async (data: any) => {
         }
         roundTimerQueue.add(data, options)
         roundTimerQueue.process(async (data: any) => {
-            console.log("This is in Process ::::::::::::::", data.data)
             data = {
                 tableId: data.data.tableId.toString(),
             }
             await setTimeout(() => {
                 checkTurn(data)
-            }, 1000)
+            }, 2000)
         })
     } catch (error) {
         logger.error("ROUND_TIMER QUEUE ERROR :::", error)

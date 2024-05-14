@@ -5,7 +5,7 @@ const logger_1 = require("../logger");
 const __1 = require("..");
 const sendToSocketIdEmmiter = (data) => {
     try {
-        logger_1.logger.info(`socketId is:::${data.eventName} and Data.Data is This is: ${JSON.stringify(data.data)}`);
+        logger_1.logger.info(`Event Name is:::${data.eventName} and Data is This is: ${JSON.stringify(data.data)}`);
         __1.io.to(data.socket.id).emit(data.eventName, data.data);
     }
     catch (error) {
@@ -16,7 +16,7 @@ const sendToSocketIdEmmiter = (data) => {
 exports.sendToSocketIdEmmiter = sendToSocketIdEmmiter;
 const sendToRoomEmmiter = (data) => {
     try {
-        logger_1.logger.info(`EventName is This:::${data.eventName} and Data.Data is This is: ${JSON.stringify(data.data)}`);
+        logger_1.logger.info(`EventName is This:::${data.eventName} and Data is This is: ${JSON.stringify(data.data)}`);
         __1.io.to(data.data._id).emit(data.eventName, data.data);
     }
     catch (error) {

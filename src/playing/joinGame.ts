@@ -9,6 +9,7 @@ import { changeTurn } from "./changeTurn"
 import { checkTurn } from "./checkTurn"
 import { roundTimer } from "../bull/queue/roundTimer"
 import { validateJoinTable } from "../validation/joinTableValidation"
+import { leaveButton } from "../bull/queue/leaveButton"
 
 const joinGame = async (data: any, socket: Socket) => {
     try {
@@ -101,18 +102,13 @@ const joinGame = async (data: any, socket: Socket) => {
                     sendToRoomEmmiter(data)
                     data = {
                         tableId: updateTable._id,
-                        time: 11000
+                        time: 6000
                     }
-                    setTimeout(() => {
-                        let data = {
-                            eventName: "LEAVE_BUTTON",
-                            data: {
-                                _id: currentTable._id.toString(),
-                                message: "ok"
-                            }
-                        }
-                        sendToRoomEmmiter(data)
-                    }, 6000)
+                    leaveButton(data)
+                    data = {
+                        tableId: updateTable._id,
+                        time: 10000
+                    }
                     await roundTimer(data)
                 }
             }

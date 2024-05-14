@@ -16,30 +16,68 @@ const userModel_1 = require("../model/userModel");
 const eventName_1 = require("../constant/eventName");
 const eventEmmitter_1 = require("../eventEmmitter");
 const roundTimer_1 = require("../bull/queue/roundTimer");
+const joinTableValidation_1 = require("../validation/joinTableValidation");
+const leaveButton_1 = require("../bull/queue/leaveButton");
 const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        logger_1.logger.info(`socket id Is::: ${socket.id} and data is::: ${JSON.stringify(data)}`);
+        logger_1.logger.info(`JOIN_TABLE EVENT DATA IS :::: ${JSON.stringify(data)}`);
         let { userId } = data;
-        if (!userId)
-            return logger_1.logger.error(`can't Get UserId In Join Table`);
+        const checkData = yield (0, joinTableValidation_1.validateJoinTable)(data);
+        if (checkData.error) {
+            data = {
+                eventName: eventName_1.EVENT_NAME.POP_UP,
+                data: {
+                    message: (_a = checkData.error) === null || _a === void 0 ? void 0 : _a.details[0].message
+                },
+                socket
+            };
+            return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
+        }
         let findUser = yield userModel_1.User.findById(userId);
-        if (!findUser)
-            return logger_1.logger.error(`can't Find User By UserId`);
-        // logger.info(`FindUser ::::::${findUser}`)
+        if (!findUser) {
+            data = {
+                eventName: eventName_1.EVENT_NAME.POP_UP,
+                data: {
+                    message: "Can't found User by Id"
+                },
+                socket
+            };
+            return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
+        }
         let checkTable = yield tableModel_1.Table.findOne({ activePlayer: { $lte: 1 } });
         if (checkTable) {
+            if (findUser.tableId == checkTable._id.toString()) {
+                data = {
+                    eventName: eventName_1.EVENT_NAME.POP_UP,
+                    data: {
+                        message: "User Already in Table !!!",
+                        return: true
+                    },
+                    socket
+                };
+                return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
+            }
+            let symbol;
+            if (checkTable.playerInfo[0].symbol == "X") {
+                symbol = "O";
+            }
+            else {
+                symbol = "X";
+            }
             let updateTable = yield tableModel_1.Table.findByIdAndUpdate({ _id: checkTable._id }, {
                 $push: {
                     playerInfo: {
                         userId: findUser._id,
                         userName: findUser.userName,
                         isActive: true,
-                        symbol: "O"
+                        symbol: symbol
                     }
                 },
                 activePlayer: 2,
                 gameStatus: "WATING"
             }, { new: true });
+            yield userModel_1.User.findByIdAndUpdate(checkTable._id, { $set: { tableId: checkTable._id.toString() } });
             if (updateTable) {
                 const newTable = yield tableModel_1.Table.findById(updateTable._id);
                 if (newTable) {
@@ -71,14 +109,14 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                     (0, eventEmmitter_1.sendToRoomEmmiter)(data);
                     data = {
                         tableId: updateTable._id,
+                        time: 6000
+                    };
+                    (0, leaveButton_1.leaveButton)(data);
+                    data = {
+                        tableId: updateTable._id,
                         time: 10000
                     };
                     yield (0, roundTimer_1.roundTimer)(data);
-                    // await setTimeout(() => {
-                    //     checkTurn({
-                    //         tableId: updateTable._id
-                    //     })
-                    // }, 11000);
                 }
             }
         }
@@ -106,6 +144,7 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                 currentTurnSeatIndex: "",
                 currentTurnUserId: ""
             });
+            yield userModel_1.User.findByIdAndUpdate(generateTable.playerInfo[0].userId, { $set: { tableId: generateTable._id.toString() } });
             if (generateTable) {
                 data = {
                     eventName: eventName_1.EVENT_NAME.JOIN_TABLE,
@@ -122,8 +161,7 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
         }
     }
     catch (error) {
-        console.log(error);
-        logger_1.logger.error(`Join Game Error: ${error}`);
+        logger_1.logger.error(`JOIN_TABLE ERROR :::: ${error}`);
     }
 });
 exports.joinGame = joinGame;

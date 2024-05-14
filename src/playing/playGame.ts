@@ -1,6 +1,5 @@
 import { Socket } from "socket.io"
 import { logger } from "../logger"
-import { json } from "express"
 import { EVENT_NAME } from "../constant/eventName"
 import { Table } from "../model/tableModel"
 import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter"
@@ -8,6 +7,7 @@ import { checkWinner } from "./checkWinner"
 import { declareWinner } from "./declareWinner"
 import { changeTurn } from "./changeTurn"
 import { validatePlayGameData } from "../validation/playGameValidation"
+import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue"
 
 const playGame = async (data: any, socket: Socket) => {
     try {
@@ -23,6 +23,7 @@ const playGame = async (data: any, socket: Socket) => {
             }
             return sendToSocketIdEmmiter(data);
         }
+        await cancleTurnTimerJob(data.tableId.toString())
         if (data.sign == "X") {
             // This is for Play
             await Table.findByIdAndUpdate(data.tableId, { gameStatus: "PLAYING" })
@@ -50,7 +51,7 @@ const playGame = async (data: any, socket: Socket) => {
                         tableId: findTableForCheckWinner._id,
                         userId: data.data.userId,
                         symbol: "X",
-                        isLeave:false
+                        isLeave: false
                     }
                     return await declareWinner(data)
                 } else if (checkWinnerorNot == "TIE") {
@@ -118,7 +119,7 @@ const playGame = async (data: any, socket: Socket) => {
                         tableId: findTableForCheckWinner._id,
                         userId: data.data.userId,
                         symbol: "O",
-                        isLeave:false
+                        isLeave: false
                     }
                     return await declareWinner(data)
                 } else if (checkWinnerorNot == "TIE") {

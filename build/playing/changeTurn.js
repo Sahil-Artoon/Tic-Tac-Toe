@@ -16,10 +16,7 @@ const eventName_1 = require("../constant/eventName");
 const eventEmmitter_1 = require("../eventEmmitter");
 const changeTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        logger_1.logger.info(`changeTurn:::Data: ${JSON.stringify(data)}`);
-        console.log("Change Turn Data Is:::", data);
-        // {"tableId":"662f7557b813436b36222971","userId":"662f{"tableId":"666b7a66976c3419de4a85"} and Socket Id::: 
-        // oNs_l6DzrGbCde4a85"} and S2f7557b813436b36222971","userId":Xt31AAAH
+        logger_1.logger.info(`CHANGE_TURN DATA :::: ${JSON.stringify(data)}`);
         let findTable = yield tableModel_1.Table.findById(data.tableId);
         if (findTable) {
             if (findTable.currentTurnSeatIndex == "0") {
@@ -57,8 +54,7 @@ const changeTurn = (data) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
     catch (error) {
-        console.log("changeTurn ::::", error);
-        logger_1.logger.error(`changeTurn Error: ${error}`);
+        logger_1.logger.error(`CHANGE_TURN ERROR :::: ${error}`);
     }
 });
 exports.changeTurn = changeTurn;
