@@ -96,7 +96,7 @@ const timerForTurn = (start, time) => {
         timerElement.textContent = time;
         if (milliseconds >= endTimer) {
             clearInterval(intervalId);
-            timerElement.textContent = '00:00:10.000';
+            timerElement.textContent = '00:00:00.000';
         }
     }
     intervalId = setInterval(updateTimer, 100);

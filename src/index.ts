@@ -6,8 +6,9 @@ import { logger } from './logger';
 import dotenv from 'dotenv';
 import { socketConnection } from './connection/socketConnection';
 import { connectDb } from './connection/dbConnection';
-import {  connectRedis } from './connection/redisConnection';
+import { connectRedis } from './connection/redisConnection';
 dotenv.config({ path: './.env' });
+import localtunnel from 'localtunnel'
 
 const app = express()
 const server = http.createServer(app);
@@ -23,9 +24,18 @@ app.get('/', async (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'))
 
 })
-const port = process.env.PORT
+const port = process.env.PORT || 5000
 server.listen(port, async () => {
   logger.info(`server listening on port http://localhost:${port}   `)
+  const tunnel = await localtunnel({ port: 5000 });
+
+  console.log(`Localtunnel is running at ${tunnel.url}`);
+
+  // Close the tunnel when the process is terminated
+  process.on('SIGINT', () => {
+    tunnel.close();
+    process.exit();
+  });
 })
 
 export { io }
