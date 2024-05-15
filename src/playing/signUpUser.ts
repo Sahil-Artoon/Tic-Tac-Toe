@@ -25,7 +25,8 @@ const signUp = async (data: any, socket: Socket) => {
         if (!checkUserIsExistOrNot) {
             let newUser = await User.create({
                 userName,
-                socketId: socket.id
+                socketId: socket.id,
+                tableId: ""
             })
             data = {
                 eventName: EVENT_NAME.SIGN_UP,

@@ -5,9 +5,10 @@ import { validationLeaveGame } from '../validation/leaveGameValidation';
 import { EVENT_NAME } from '../constant/eventName';
 import { sendToRoomEmmiter, sendToSocketIdEmmiter } from '../eventEmmitter';
 import { User } from '../model/userModel';
-import { io } from '..';
 import { declareWinner } from './declareWinner';
 import { getCancleJob } from '../bull/cancleQueue/cancleRoundTimerQueue';
+import { cancleLeaveButton } from '../bull/cancleQueue/cancleLeaveButton';
+import { cancleTurnTimerJob } from '../bull/cancleQueue/cancleTurnTimerQueue';
 const leaveGame = async (data: any, socket: Socket) => {
     try {
         logger.info(`LEAVE_GAME DATA :::: ${JSON.stringify(data)}`)
@@ -38,9 +39,11 @@ const leaveGame = async (data: any, socket: Socket) => {
                 return sendToSocketIdEmmiter(data);
             }
             if (findTable.gameStatus == "ROUND_TIMER_START") {
+                await cancleLeaveButton(findTable._id.toString());
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     let check = await getCancleJob(findTable._id.toString())
                     if (check == true) {
+                        console.log("This is inside ::: findTable.playerInfo[0].userId")
                         await Table.findByIdAndUpdate(findTable._id, { $pull: { playerInfo: findTable.playerInfo[0] } })
                         let newTable = await Table.findByIdAndUpdate(findTable._id, { $set: { activePlayer: findTable.activePlayer - 1, gameStatus: "WATING" } }, { new: true })
                         await User.findByIdAndUpdate(data.userData.userData.userId, { $set: { tableId: "" } })
@@ -61,6 +64,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                 if (findTable.playerInfo[1].userId == data.userData.userData.userId) {
                     let check = await getCancleJob(findTable._id.toString())
                     if (check == true) {
+                        console.log("This is inside ::: findTable.playerInfo[1].userId")
                         await Table.findByIdAndUpdate(findTable._id, { $pull: { playerInfo: findTable.playerInfo[1] } })
                         let newTable = await Table.findByIdAndUpdate(findTable._id, { $set: { activePlayer: findTable.activePlayer - 1, gameStatus: "WATING" } }, { new: true })
                         await User.findByIdAndUpdate(data.userData.userData.userId, { $set: { tableId: "" } })
@@ -80,6 +84,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                 }
             }
             if (findTable.gameStatus == "CHECK_TURN") {
+                await cancleTurnTimerJob(findTable._id.toString())
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     data = {
                         userId: findTable.playerInfo[1].userId,
@@ -100,6 +105,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                 }
             }
             if (findTable.gameStatus == "PLAYING") {
+                await cancleTurnTimerJob(findTable._id.toString())
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     data = {
                         userId: findTable.playerInfo[1].userId,

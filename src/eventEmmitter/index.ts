@@ -1,6 +1,4 @@
-import { Socket } from "socket.io";
 import { logger } from "../logger";
-import { EVENT_NAME } from "../constant/eventName";
 import { io } from "..";
 
 const sendToSocketIdEmmiter = (data: any) => {
