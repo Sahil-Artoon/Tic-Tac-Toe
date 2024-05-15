@@ -8,7 +8,6 @@ const getCancleJob = async (jobId: any) => {
     try {
         const queue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
         const job = await queue.getJob(jobId);
-        console.log("Current Job is :::: ",job)
         if(job){
             await job?.remove();
             return true

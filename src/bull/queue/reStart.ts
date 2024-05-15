@@ -24,7 +24,6 @@ const reStart = (data: any) => {
             sendToRoomEmmiter(data)
         })
     } catch (error) {
-        console.log("Queue RoundTimer Error :::", error)
         logger.error("Queue RoundTimer Error :::", error)
     }
 }

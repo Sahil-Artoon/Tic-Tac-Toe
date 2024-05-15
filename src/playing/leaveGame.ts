@@ -121,7 +121,7 @@ const leaveGame = async (data: any, socket: Socket) => {
             }
         }
     } catch (error) {
-        console.log(error);
+        logger.error(`LEAVE_GAME ERROR :::: ${error}`)
     }
 }
 

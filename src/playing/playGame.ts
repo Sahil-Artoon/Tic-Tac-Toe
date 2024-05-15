@@ -88,7 +88,7 @@ const playGame = async (data: any, socket: Socket) => {
                     socket
                 }
                 sendToRoomEmmiter(data)
-                return await changeTurn({ tableId: findTableForCheckWinner._id })
+                return await changeTurn({ tableId: findTableForCheckWinner._id, play: true })
             }
         }
 

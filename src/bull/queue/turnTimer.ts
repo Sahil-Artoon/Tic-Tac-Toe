@@ -17,8 +17,7 @@ const turnTimer = async (data: any) => {
         }
         roundTimerQueue.add(data, options)
         roundTimerQueue.process(async (data: any) => {
-            console.log("Inside Turn_TIMER !!!")
-            changeTurn(data.data)
+            changeTurn({ tableId: data.data.tableId, play: false })
         })
     } catch (error) {
         logger.error("ROUND_TIMER QUEUE ERROR :::", error)

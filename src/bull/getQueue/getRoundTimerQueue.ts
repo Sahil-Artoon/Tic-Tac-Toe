@@ -14,8 +14,6 @@ const getJob = async (jobId: any) => {
             let timePassed = Math.floor(timestramptime / 1000)
             let penddingTime = job.data.time - (timePassed * 1000)
             return penddingTime;
-        } else {
-            console.log('THIS IS JOB EMPTY AT ROUNDTIMER_STRAT TIME::::');
         }
     } catch (error) {
         console.error('Error getting job:', error);

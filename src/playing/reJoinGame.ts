@@ -13,7 +13,6 @@ import { TIMER } from "../constant/timerConstant";
 const reJoinGame = async (data: any, socket: Socket) => {
     try {
         logger.info(`RE_JOIN EVENT DATA :::: ${JSON.stringify(data)}`)
-        // console.log("Rejoin Event::::::", data)
         let checkData = await validateRejoinData(data)
         if (checkData.error) {
             data = {
@@ -28,7 +27,6 @@ const reJoinGame = async (data: any, socket: Socket) => {
         let findTable = await Table.findById(data.tableId)
         if (findTable) {
             if (findTable.playerInfo.length == 1) {
-                console.log("This is One Player", findTable.playerInfo)
                 if (findTable.playerInfo[0].userId == data.userData.userId) {
                     await User.findByIdAndUpdate(findTable.playerInfo[0].userId, { socketId: socket.id, tableId: findTable._id.toString() });
                     await Table.findByIdAndUpdate(findTable._id, { $set: { 'playerInfo[0].socketId': socket.id } })
@@ -114,7 +112,6 @@ const reJoinGame = async (data: any, socket: Socket) => {
                 }
                 if (findTable.gameStatus == "CHECK_TURN") {
                     let getpanddingTime: any = await getTurnTimerQueue(findTable._id.toString())
-                    console.log("Get pandding time: ", getpanddingTime)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
@@ -132,7 +129,6 @@ const reJoinGame = async (data: any, socket: Socket) => {
 
                 if (findTable.gameStatus == "PLAYING") {
                     let getpanddingTime: any = await getTurnTimerQueue(findTable._id.toString())
-                    console.log("Get pandding time: ", getpanddingTime)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {

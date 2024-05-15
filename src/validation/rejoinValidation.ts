@@ -8,6 +8,7 @@ const validateRejoinData = async (data: any) => {
             userName: Joi.string().required(),
             isActive: Joi.boolean().required(),
             symbol: Joi.string().required(),
+            turnMiss: Joi.number().required(),
             _id: Joi.string().required()
         }).required()
     });
