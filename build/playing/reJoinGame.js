@@ -17,11 +17,12 @@ const eventEmmitter_1 = require("../eventEmmitter");
 const eventName_1 = require("../constant/eventName");
 const getRoundTimerQueue_1 = require("../bull/getQueue/getRoundTimerQueue");
 const rejoinValidation_1 = require("../validation/rejoinValidation");
+const getTurnTimerQueue_1 = require("../bull/getQueue/getTurnTimerQueue");
+const timerConstant_1 = require("../constant/timerConstant");
 const reJoinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         logger_1.logger.info(`RE_JOIN EVENT DATA :::: ${JSON.stringify(data)}`);
-        // console.log("Rejoin Event::::::", data)
         let checkData = yield (0, rejoinValidation_1.validateRejoinData)(data);
         if (checkData.error) {
             data = {
@@ -34,20 +35,8 @@ const reJoinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function*
             return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
         }
         let findTable = yield tableModel_1.Table.findById(data.tableId);
-        // if (!findTable) {
-        //     data = {
-        //         eventName: EVENT_NAME.POP_UP,
-        //         data: {
-        //             message: "Can't found record !!!"
-        //         },
-        //         socket
-        //     }
-        //     return sendToSocketIdEmmiter(data);
-        // }
         if (findTable) {
-            // console.log("This is Rejoin Table ::::", findTable)
             if (findTable.playerInfo.length == 1) {
-                console.log("This is One Player", findTable.playerInfo);
                 if (findTable.playerInfo[0].userId == data.userData.userId) {
                     yield userModel_1.User.findByIdAndUpdate(findTable.playerInfo[0].userId, { socketId: socket.id, tableId: findTable._id.toString() });
                     yield tableModel_1.Table.findByIdAndUpdate(findTable._id, { $set: { 'playerInfo[0].socketId': socket.id } });
@@ -117,27 +106,48 @@ const reJoinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function*
                         return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
                     }
                 }
+                if (findTable.gameStatus == "LOCK") {
+                    let getpanddingTime = yield (0, getRoundTimerQueue_1.getJob)(findTable._id.toString());
+                    data = {
+                        eventName: eventName_1.EVENT_NAME.REJOIN_GAME,
+                        data: {
+                            gameStatus: findTable.gameStatus,
+                            data,
+                            time: getpanddingTime,
+                            message: "ok",
+                            leaveButton: false,
+                        },
+                        socket
+                    };
+                    return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
+                }
                 if (findTable.gameStatus == "CHECK_TURN") {
+                    let getpanddingTime = yield (0, getTurnTimerQueue_1.getTurnTimerQueue)(findTable._id.toString());
                     data = {
                         eventName: eventName_1.EVENT_NAME.REJOIN_GAME,
                         data: {
                             gameStatus: findTable.gameStatus,
                             data,
                             tableData: findTable,
-                            message: "ok"
+                            message: "ok",
+                            pandingTime: getpanddingTime,
+                            time: timerConstant_1.TIMER.TURN_TIMER
                         },
                         socket
                     };
                     return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
                 }
                 if (findTable.gameStatus == "PLAYING") {
+                    let getpanddingTime = yield (0, getTurnTimerQueue_1.getTurnTimerQueue)(findTable._id.toString());
                     data = {
                         eventName: eventName_1.EVENT_NAME.REJOIN_GAME,
                         data: {
                             gameStatus: findTable.gameStatus,
                             data,
                             tableData: findTable,
-                            message: "ok"
+                            message: "ok",
+                            pandingTime: getpanddingTime,
+                            time: timerConstant_1.TIMER.TURN_TIMER
                         },
                         socket
                     };

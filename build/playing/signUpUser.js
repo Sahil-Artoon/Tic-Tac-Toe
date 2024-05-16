@@ -35,7 +35,8 @@ const signUp = (data, socket) => __awaiter(void 0, void 0, void 0, function* () 
         if (!checkUserIsExistOrNot) {
             let newUser = yield userModel_1.User.create({
                 userName,
-                socketId: socket.id
+                socketId: socket.id,
+                tableId: ""
             });
             data = {
                 eventName: eventName_1.EVENT_NAME.SIGN_UP,

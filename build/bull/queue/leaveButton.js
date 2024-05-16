@@ -30,19 +30,20 @@ const leaveButton = (data) => __awaiter(void 0, void 0, void 0, function* () {
         };
         roundTimerQueue.add(data, options);
         roundTimerQueue.process((data) => __awaiter(void 0, void 0, void 0, function* () {
-            yield tableModel_1.Table.findByIdAndUpdate(data.data.tableId, { $set: { ganeStatus: "LOCK" } });
+            let updateTable = yield tableModel_1.Table.findByIdAndUpdate(data.data.tableId, { $set: { gameStatus: "LOCK" } });
             let dataofLeavetable = {
                 eventName: "LEAVE_BUTTON",
                 data: {
                     _id: data.data.tableId.toString(),
-                    message: "ok"
+                    message: "ok",
+                    updateTable
                 }
             };
             (0, eventEmmitter_1.sendToRoomEmmiter)(dataofLeavetable);
         }));
     }
     catch (error) {
-        logger_1.logger.error("ROUND_TIMER QUEUE ERROR :::", error);
+        logger_1.logger.error("LEAVE_BUTTTON QUEUE ERROR :::", error);
     }
 });
 exports.leaveButton = leaveButton;

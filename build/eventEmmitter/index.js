@@ -9,7 +9,6 @@ const sendToSocketIdEmmiter = (data) => {
         __1.io.to(data.socket.id).emit(data.eventName, data.data);
     }
     catch (error) {
-        console.log("sendToSocketIdEmmiter ::::", error);
         logger_1.logger.error(`sendToSocketIdEmmiter Error: ${error}`);
     }
 };
@@ -20,7 +19,6 @@ const sendToRoomEmmiter = (data) => {
         __1.io.to(data.data._id).emit(data.eventName, data.data);
     }
     catch (error) {
-        console.log("sendToRoomEmmiter ::::", error);
         logger_1.logger.error(`sendToRoomEmmiter Error: ${error}`);
     }
 };

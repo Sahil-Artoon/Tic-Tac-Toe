@@ -12,21 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validationLeaveGame = void 0;
-const joi_1 = __importDefault(require("joi"));
-const validationLeaveGame = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const schema = joi_1.default.object({
-        tableId: joi_1.default.string().required(),
-        userData: joi_1.default.object({
-            userId: joi_1.default.string().required(),
-            userName: joi_1.default.string().required(),
-            isActive: joi_1.default.boolean().required(),
-            symbol: joi_1.default.string().required(),
-            turnMiss: joi_1.default.number().required(),
-            _id: joi_1.default.string().required()
-        }).required()
-    });
-    const validationResult = schema.validate(data);
-    return validationResult;
+exports.cancleTurnTimerJob = void 0;
+const bull_1 = __importDefault(require("bull"));
+const queueConstant_1 = require("../../constant/queueConstant");
+const redisConnection_1 = require("../../connection/redisConnection");
+const logger_1 = require("../../logger");
+const cancleTurnTimerJob = (jobId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const queue = new bull_1.default(queueConstant_1.QUEUE_EVENT.TURN_TIMER, redisConnection_1.redisOption);
+        const job = yield queue.getJob(jobId);
+        if (job) {
+            yield (job === null || job === void 0 ? void 0 : job.remove());
+            return true;
+        }
+        return false;
+    }
+    catch (error) {
+        logger_1.logger.error("ROUND_TIMER CANCLE QUEUE ERROR :::: ", error);
+    }
 });
-exports.validationLeaveGame = validationLeaveGame;
+exports.cancleTurnTimerJob = cancleTurnTimerJob;

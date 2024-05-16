@@ -4,18 +4,14 @@ import http from 'http';
 import { Server } from "socket.io";
 import { logger } from './logger';
 import dotenv from 'dotenv';
-import { socketConnection } from './connection/socketConnection';
-import { connectDb } from './connection/dbConnection';
-import { connectRedis } from './connection/redisConnection';
 dotenv.config({ path: './.env' });
 import localtunnel from 'localtunnel'
-
+import { allConnections } from './connection/allConnections';
 const app = express()
 const server = http.createServer(app);
 const io = new Server(server);
-socketConnection();
-connectDb();
-connectRedis()
+
+allConnections()
 
 app.use(express.json())
 app.use(express.static(path.join(__dirname, '../public')))

@@ -23,6 +23,8 @@ const socketConnection_1 = require("./connection/socketConnection");
 const dbConnection_1 = require("./connection/dbConnection");
 const redisConnection_1 = require("./connection/redisConnection");
 dotenv_1.default.config({ path: './.env' });
+const localtunnel_1 = __importDefault(require("localtunnel"));
+const reLockConnection_1 = require("./connection/reLockConnection");
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server);
@@ -30,14 +32,22 @@ exports.io = io;
 (0, socketConnection_1.socketConnection)();
 (0, dbConnection_1.connectDb)();
 (0, redisConnection_1.connectRedis)();
+(0, reLockConnection_1.RedLockConnction)();
 app.use(express_1.default.json());
 app.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.sendFile(path_1.default.join(__dirname, '../public/index.html'));
 }));
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 server.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
     logger_1.logger.info(`server listening on port http://localhost:${port}   `);
+    const tunnel = yield (0, localtunnel_1.default)({ port: 5000 });
+    console.log(`Localtunnel is running at ${tunnel.url}`);
+    // Close the tunnel when the process is terminated
+    process.on('SIGINT', () => {
+        tunnel.close();
+        process.exit();
+    });
 }));
 try {
     process

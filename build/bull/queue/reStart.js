@@ -30,7 +30,6 @@ const reStart = (data) => {
         });
     }
     catch (error) {
-        console.log("Queue RoundTimer Error :::", error);
         logger_1.logger.error("Queue RoundTimer Error :::", error);
     }
 };

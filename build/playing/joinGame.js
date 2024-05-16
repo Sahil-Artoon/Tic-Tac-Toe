@@ -71,13 +71,14 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                         userId: findUser._id,
                         userName: findUser.userName,
                         isActive: true,
-                        symbol: symbol
+                        symbol: symbol,
+                        turnMiss: 0
                     }
                 },
                 activePlayer: 2,
                 gameStatus: "WATING"
             }, { new: true });
-            yield userModel_1.User.findByIdAndUpdate(checkTable._id, { $set: { tableId: checkTable._id.toString() } });
+            yield userModel_1.User.findByIdAndUpdate(findUser._id, { $set: { tableId: checkTable._id.toString() } });
             if (updateTable) {
                 const newTable = yield tableModel_1.Table.findById(updateTable._id);
                 if (newTable) {
@@ -126,7 +127,8 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                         userId: findUser._id,
                         userName: findUser.userName,
                         isActive: true,
-                        symbol: "X"
+                        symbol: "X",
+                        turnMiss: 0
                     }],
                 playingData: [
                     { userId: "", symbol: "" },
@@ -141,8 +143,8 @@ const joinGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                 ],
                 activePlayer: 1,
                 gameStatus: "WATING",
-                currentTurnSeatIndex: "",
-                currentTurnUserId: ""
+                currentTurnSeatIndex: null,
+                currentTurnUserId: null
             });
             yield userModel_1.User.findByIdAndUpdate(generateTable.playerInfo[0].userId, { $set: { tableId: generateTable._id.toString() } });
             if (generateTable) {

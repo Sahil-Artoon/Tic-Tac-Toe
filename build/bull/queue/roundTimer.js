@@ -34,7 +34,7 @@ const roundTimer = (data) => __awaiter(void 0, void 0, void 0, function* () {
             };
             yield setTimeout(() => {
                 (0, checkTurn_1.checkTurn)(data);
-            }, 1000);
+            }, 2000);
         }));
     }
     catch (error) {

@@ -18,6 +18,8 @@ const eventEmmitter_1 = require("../eventEmmitter");
 const userModel_1 = require("../model/userModel");
 const declareWinner_1 = require("./declareWinner");
 const cancleRoundTimerQueue_1 = require("../bull/cancleQueue/cancleRoundTimerQueue");
+const cancleLeaveButton_1 = require("../bull/cancleQueue/cancleLeaveButton");
+const cancleTurnTimerQueue_1 = require("../bull/cancleQueue/cancleTurnTimerQueue");
 const leaveGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         logger_1.logger.info(`LEAVE_GAME DATA :::: ${JSON.stringify(data)}`);
@@ -48,9 +50,11 @@ const leaveGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* 
                 return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
             }
             if (findTable.gameStatus == "ROUND_TIMER_START") {
+                yield (0, cancleLeaveButton_1.cancleLeaveButton)(findTable._id.toString());
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     let check = yield (0, cancleRoundTimerQueue_1.getCancleJob)(findTable._id.toString());
                     if (check == true) {
+                        console.log("This is inside ::: findTable.playerInfo[0].userId");
                         yield tableModel_1.Table.findByIdAndUpdate(findTable._id, { $pull: { playerInfo: findTable.playerInfo[0] } });
                         let newTable = yield tableModel_1.Table.findByIdAndUpdate(findTable._id, { $set: { activePlayer: findTable.activePlayer - 1, gameStatus: "WATING" } }, { new: true });
                         yield userModel_1.User.findByIdAndUpdate(data.userData.userData.userId, { $set: { tableId: "" } });
@@ -71,6 +75,7 @@ const leaveGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* 
                 if (findTable.playerInfo[1].userId == data.userData.userData.userId) {
                     let check = yield (0, cancleRoundTimerQueue_1.getCancleJob)(findTable._id.toString());
                     if (check == true) {
+                        console.log("This is inside ::: findTable.playerInfo[1].userId");
                         yield tableModel_1.Table.findByIdAndUpdate(findTable._id, { $pull: { playerInfo: findTable.playerInfo[1] } });
                         let newTable = yield tableModel_1.Table.findByIdAndUpdate(findTable._id, { $set: { activePlayer: findTable.activePlayer - 1, gameStatus: "WATING" } }, { new: true });
                         yield userModel_1.User.findByIdAndUpdate(data.userData.userData.userId, { $set: { tableId: "" } });
@@ -90,6 +95,7 @@ const leaveGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* 
                 }
             }
             if (findTable.gameStatus == "CHECK_TURN") {
+                yield (0, cancleTurnTimerQueue_1.cancleTurnTimerJob)(findTable._id.toString());
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     data = {
                         userId: findTable.playerInfo[1].userId,
@@ -110,6 +116,7 @@ const leaveGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* 
                 }
             }
             if (findTable.gameStatus == "PLAYING") {
+                yield (0, cancleTurnTimerQueue_1.cancleTurnTimerJob)(findTable._id.toString());
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     data = {
                         userId: findTable.playerInfo[1].userId,
@@ -132,7 +139,7 @@ const leaveGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* 
         }
     }
     catch (error) {
-        console.log(error);
+        logger_1.logger.error(`LEAVE_GAME ERROR :::: ${error}`);
     }
 });
 exports.leaveGame = leaveGame;

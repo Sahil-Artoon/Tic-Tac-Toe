@@ -32,7 +32,7 @@ const declareWinner = (data) => __awaiter(void 0, void 0, void 0, function* () {
             };
             setTimeout(() => {
                 deleteTable(tableId);
-            }, (60000 * 2));
+            }, (20000));
             (0, eventEmmitter_1.sendToRoomEmmiter)(data);
             return yield (0, reStart_1.reStart)(data.data);
         }
@@ -52,7 +52,7 @@ const declareWinner = (data) => __awaiter(void 0, void 0, void 0, function* () {
             };
             setTimeout(() => {
                 deleteTable(tableId);
-            }, (60000 * 2));
+            }, (20000));
             (0, eventEmmitter_1.sendToRoomEmmiter)(data);
             return yield (0, reStart_1.reStart)(data.data);
         }

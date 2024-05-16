@@ -28,9 +28,6 @@ const getJob = (jobId) => __awaiter(void 0, void 0, void 0, function* () {
             let penddingTime = job.data.time - (timePassed * 1000);
             return penddingTime;
         }
-        else {
-            console.log('THIS IS JOB EMPTY AT ROUNDTIMER_STRAT TIME::::');
-        }
     }
     catch (error) {
         console.error('Error getting job:', error);

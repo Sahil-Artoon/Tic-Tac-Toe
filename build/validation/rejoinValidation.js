@@ -22,6 +22,7 @@ const validateRejoinData = (data) => __awaiter(void 0, void 0, void 0, function*
             userName: joi_1.default.string().required(),
             isActive: joi_1.default.boolean().required(),
             symbol: joi_1.default.string().required(),
+            turnMiss: joi_1.default.number().required(),
             _id: joi_1.default.string().required()
         }).required()
     });

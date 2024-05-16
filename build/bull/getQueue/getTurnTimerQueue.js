@@ -12,23 +12,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCancleJob = void 0;
+exports.getTurnTimerQueue = void 0;
 const bull_1 = __importDefault(require("bull"));
-const queueConstant_1 = require("../../constant/queueConstant");
 const redisConnection_1 = require("../../connection/redisConnection");
-const logger_1 = require("../../logger");
-const getCancleJob = (jobId) => __awaiter(void 0, void 0, void 0, function* () {
+const queueConstant_1 = require("../../constant/queueConstant");
+const queue = new bull_1.default(queueConstant_1.QUEUE_EVENT.TURN_TIMER, redisConnection_1.redisOption);
+const getTurnTimerQueue = (jobId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const queue = new bull_1.default(queueConstant_1.QUEUE_EVENT.ROUND_TIMER, redisConnection_1.redisOption);
         const job = yield queue.getJob(jobId);
         if (job) {
-            yield (job === null || job === void 0 ? void 0 : job.remove());
-            return true;
+            const currentTime = Date.now();
+            const enqueueTime = job.timestamp;
+            const timestramptime = currentTime - enqueueTime;
+            let timePassed = Math.floor(timestramptime / 1000);
+            let penddingTime = job.data.time - (timePassed * 1000);
+            return penddingTime;
         }
-        return false;
     }
     catch (error) {
-        logger_1.logger.error("ROUND_TIMER CANCLE QUEUE ERROR :::: ", error);
+        console.error('Error getting job:', error);
     }
 });
-exports.getCancleJob = getCancleJob;
+exports.getTurnTimerQueue = getTurnTimerQueue;

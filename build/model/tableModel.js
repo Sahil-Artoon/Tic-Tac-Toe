@@ -22,6 +22,10 @@ const tableSchema = new mongoose_1.default.Schema({
             symbol: {
                 type: String,
                 required: true
+            },
+            turnMiss: {
+                type: Number,
+                default: 0
             }
         }],
     playingData: [{
@@ -30,7 +34,7 @@ const tableSchema = new mongoose_1.default.Schema({
             },
             symbol: {
                 type: String
-            }
+            },
         }],
     maxPlayer: {
         type: Number,
@@ -44,7 +48,7 @@ const tableSchema = new mongoose_1.default.Schema({
         type: String
     },
     currentTurnSeatIndex: {
-        type: String
+        type: Number
     },
     currentTurnUserId: {
         type: String

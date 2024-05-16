@@ -18,6 +18,7 @@ const checkWinner_1 = require("./checkWinner");
 const declareWinner_1 = require("./declareWinner");
 const changeTurn_1 = require("./changeTurn");
 const playGameValidation_1 = require("../validation/playGameValidation");
+const cancleTurnTimerQueue_1 = require("../bull/cancleQueue/cancleTurnTimerQueue");
 const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -33,6 +34,7 @@ const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
             };
             return (0, eventEmmitter_1.sendToSocketIdEmmiter)(data);
         }
+        yield (0, cancleTurnTimerQueue_1.cancleTurnTimerJob)(data.tableId.toString());
         if (data.sign == "X") {
             // This is for Play
             yield tableModel_1.Table.findByIdAndUpdate(data.tableId, { gameStatus: "PLAYING" });
@@ -98,7 +100,7 @@ const playGame = (data, socket) => __awaiter(void 0, void 0, void 0, function* (
                     socket
                 };
                 (0, eventEmmitter_1.sendToRoomEmmiter)(data);
-                return yield (0, changeTurn_1.changeTurn)({ tableId: findTableForCheckWinner._id });
+                return yield (0, changeTurn_1.changeTurn)({ tableId: findTableForCheckWinner._id, play: true });
             }
         }
         if (data.sign == "O") {
