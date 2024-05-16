@@ -71,7 +71,7 @@ const joinGame = async (data: any, socket: Socket) => {
                 activePlayer: 2,
                 gameStatus: "WATING"
             }, { new: true })
-            await User.findByIdAndUpdate(checkTable._id, { $set: { tableId: checkTable._id.toString() } });
+            await User.findByIdAndUpdate(findUser._id, { $set: { tableId: checkTable._id.toString() } });
             if (updateTable) {
                 const newTable = await Table.findById(updateTable._id)
                 if (newTable) {
