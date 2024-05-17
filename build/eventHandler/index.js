@@ -20,7 +20,7 @@ const leaveGame_1 = require("../playing/leaveGame");
 const eventHandler = (socket) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         socket.onAny((eventName, data) => {
-            logger_1.logger.info(`Event Name is : ${eventName} : Request Data : ${JSON.stringify(data)}`);
+            logger_1.logger.info(`::::::::::::::::::::::::::: Event Name is : ${eventName} ::::::::::::::::::::::::::: Request Data : ${JSON.stringify(data)}`);
             switch (eventName) {
                 case eventName_1.EVENT_NAME.SIGN_UP:
                     (0, signUpUser_1.signUp)(data, socket);

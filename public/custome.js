@@ -8,7 +8,23 @@ var userName;
 var tableId;
 let seconds;
 
+function getSession(key) {
+    const value = sessionStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+}
+
 const currentUser = getSession("CurrentUser")
+const User = getSession("User")
+
+
+if (User) {
+    console.log("::::::::::::: User :::::::::::")
+    console.log(User);
+    userId = User.userId
+    userName = User.userName
+    document.querySelector('.form-container').style.display = 'none'
+    document.querySelector('.play-btn').style.display = 'block'
+}
 
 // Sign-up Event
 document.getElementById('join-table-form').addEventListener('submit', (event) => {
@@ -107,12 +123,13 @@ const timerForTurn = (start, time) => {
 function setSession(key, value) {
     sessionStorage.setItem(key, JSON.stringify(value));
 }
+function setUserSession(key, value, expire) {
+    const now = new Date().getTime();
+    const expirationTime = now + expire * 60 * 1000;
+    sessionStorage.setItem(key, JSON.stringify(value), expirationTime);
+}
 
 // Function to get session storage value
-function getSession(key) {
-    const value = sessionStorage.getItem(key);
-    return value ? JSON.parse(value) : null;
-}
 
 //::::::: Print Bord Value at Rejoin Time ::::::::
 const PrintTableDataAtRejoinTime = (data, index) => {
@@ -126,7 +143,14 @@ const signUpGame = (data) => {
     if (data.message == "ok") {
         userId = data.data._id
         userName = data.data.userName
-        // console.log(`UserId is:::::${userId}`)
+
+        data = {
+            userId,
+            userName
+        }
+
+        setUserSession('User', data, 5)
+
         document.querySelector('.form-container').style.display = 'none'
         document.querySelector('.play-btn').style.display = 'block'
     }
@@ -233,7 +257,7 @@ const declareWinner = (data) => {
                 document.querySelector('.form-container').style.display = 'block'
                 document.getElementById('leave-button').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'none';
-                reStart()
+                reStart('CurrentUser')
             } else {
                 document.getElementById('winner').innerHTML = `${userName} You Win`;
                 document.querySelector(".board").classList.add("disabled");
@@ -271,6 +295,7 @@ const reJoinGame = (data) => {
             document.getElementById('main-timer').style.display = "none"
             document.getElementById('leave-button').style.display = 'block'
             document.querySelector('#all-game').style.display = 'block';
+            document.querySelector('.play-btn').style.display = 'none';
             document.querySelector('#currentUserName').innerHTML = userName
             disableBoard('Waiting');
         }
@@ -281,6 +306,7 @@ const reJoinGame = (data) => {
             tableId = data.data.tableId;
             document.querySelector('.form-container').style.display = 'none'
             document.getElementById('main-timer').style.display = "none"
+            document.querySelector('.play-btn').style.display = 'none';
             document.querySelector('#all-game').style.display = 'block';
             document.querySelector('#currentUserName').innerHTML = userName
             disableBoard('');
@@ -341,12 +367,14 @@ const reJoinGame = (data) => {
             if (data.tableData.currentTurnUserId == userId) {
                 document.querySelector('.form-container').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'block';
+                document.querySelector('.play-btn').style.display = 'none';
                 enableBoard()
                 document.getElementById('winner').innerHTML = "It's your Turn.";
                 document.getElementById('main-timer').style.display = "block"
                 timerForTurn(data.pandingTime, data.time)
             }
             if (data.tableData.currentTurnUserId != userId) {
+                document.querySelector('.play-btn').style.display = 'none';
                 document.querySelector('.form-container').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'block';
                 document.getElementById('main-timer').style.display = "none"
@@ -361,6 +389,7 @@ const reJoinGame = (data) => {
             document.getElementById('leave-button').style.display = "block"
             if (data.tableData.currentTurnUserId == userId) {
                 document.querySelector('.form-container').style.display = 'none'
+                document.querySelector('.play-btn').style.display = 'none';
                 document.querySelector('#all-game').style.display = 'block';
                 enableBoard()
                 document.getElementById('winner').innerHTML = "It's your Turn.";
@@ -371,6 +400,7 @@ const reJoinGame = (data) => {
                 document.querySelector('.form-container').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'block';
                 document.getElementById('main-timer').style.display = "none"
+                document.querySelector('.play-btn').style.display = 'none';
                 disableBoard('Aponent Turn.')
             }
             for (let i = 0; i < data.tableData.playingData.length; i++) {
@@ -384,6 +414,7 @@ const reJoinGame = (data) => {
             tableId = data.data.tableId;
             document.querySelector('.form-container').style.display = 'none'
             document.querySelector('#all-game').style.display = 'block';
+            document.querySelector('.play-btn').style.display = 'none';
             document.querySelector(".board").classList.add("disabled");
             for (let i = 0; i < data.tableData.playingData.length; i++) {
                 PrintTableDataAtRejoinTime(data.tableData.playingData[i], i)
@@ -422,7 +453,7 @@ const leaveGame = (data) => {
             document.querySelector('.form-container').style.display = 'block'
             document.getElementById('leave-button').style.display = 'none'
             document.querySelector('#all-game').style.display = 'none';
-            reStart()
+            reStart('CurrentUser')
         }
     }
 
@@ -432,7 +463,7 @@ const leaveGame = (data) => {
                 document.querySelector('.form-container').style.display = 'block'
                 document.getElementById('leave-button').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'none';
-                reStart()
+                reStart('CurrentUser')
             } else {
                 seconds = 0
                 setTimeout(() => {
@@ -449,7 +480,19 @@ const leaveGame = (data) => {
                 document.querySelector('.form-container').style.display = 'block'
                 document.getElementById('leave-button').style.display = 'none'
                 document.querySelector('#all-game').style.display = 'none';
-                reStart()
+                reStart("CurrentUser")
+            } else {
+                disableBoard("Waiting")
+            }
+        }
+    }
+    if (data.gameStatus == "PLAYING") {
+        if (data.message == "ok") {
+            if (data.tableData.playerInfo[0].userId != userId) {
+                document.querySelector('.form-container').style.display = 'block'
+                document.getElementById('leave-button').style.display = 'none'
+                document.querySelector('#all-game').style.display = 'none';
+                reStart("CurrentUser")
             } else {
                 disableBoard("Waiting")
             }
@@ -466,7 +509,7 @@ const disableLeaveButton = (data) => {
 }
 
 const reStart = (data) => {
-    sessionStorage.clear();
+    sessionStorage.removeItem('CurrentUser');
     window.location.reload();
 }
 
@@ -518,7 +561,6 @@ socket.onAny((eventName, data) => {
             break;
     }
 })
-
 
 if (currentUser) {
     console.log("CurrentUser is ::::::::::::::::: ", currentUser)

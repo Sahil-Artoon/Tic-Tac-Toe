@@ -3,48 +3,54 @@ import { EVENT_NAME } from "../constant/eventName";
 import { sendToRoomEmmiter } from "../eventEmmitter";
 import { Table } from "../model/tableModel";
 import { reStart } from "../bull/queue/reStart";
+import { User } from "../model/userModel";
 
 const declareWinner = async (data: any) => {
     try {
         logger.info(`DECLARE_WINNWE DATA :::: ${JSON.stringify(data)}`)
-        if (data.symbol == "TIE") {
-            let tableId = data.tableId
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "TIE", winnerUserId: data.userId })
-            data = {
-                eventName: EVENT_NAME.WINNER,
-                data: {
-                    _id: data.tableId.toString(),
-                    message: "TIE",
-                    symbol: data.symbol,
-                    timer: 5000
+        let tableId = data.tableId
+        let winnerTable = await Table.findById(tableId)
+        if (winnerTable) {
+            if (data.symbol == "TIE") {
+                await Table.findByIdAndUpdate(winnerTable, { gameStatus: "TIE", winnerUserId: data.userId })
+                await User.findByIdAndUpdate(winnerTable.playerInfo[0].userId, { $set: { tableId: "" } })
+                await User.findByIdAndUpdate(winnerTable.playerInfo[1].userId, { $set: { tableId: "" } })
+                data = {
+                    eventName: EVENT_NAME.WINNER,
+                    data: {
+                        _id: data.tableId.toString(),
+                        message: "TIE",
+                        symbol: data.symbol,
+                        timer: 5000
+                    }
                 }
+                setTimeout(() => {
+                    deleteTable(tableId)
+                }, (20000))
+                sendToRoomEmmiter(data)
+                return await reStart(data.data)
             }
-            setTimeout(() => {
-                deleteTable(tableId)
-            }, (20000))
-            sendToRoomEmmiter(data)
-            return await reStart(data.data)
-        }
-        if (data.symbol == "O" || data.symbol == "X") {
-            let tableId = data.tableId
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNING", winnerUserId: data.userId })
-            data = {
-                eventName: EVENT_NAME.WINNER,
-                data: {
-                    _id: data.tableId.toString(),
-                    message: "Winner",
-                    symbol: data.symbol,
-                    userId: data.userId,
-                    isLeave: data.isLeave,
-                    timer: 5000
-                },
-            }
-            setTimeout(() => {
-                deleteTable(tableId)
-            }, (20000))
+            if (data.symbol == "O" || data.symbol == "X") {
+                let tableId = data.tableId
+                await Table.findByIdAndUpdate(data.tableId, { gameStatus: "WINNING", winnerUserId: data.userId })
+                data = {
+                    eventName: EVENT_NAME.WINNER,
+                    data: {
+                        _id: data.tableId.toString(),
+                        message: "Winner",
+                        symbol: data.symbol,
+                        userId: data.userId,
+                        isLeave: data.isLeave,
+                        timer: 5000
+                    },
+                }
+                setTimeout(() => {
+                    deleteTable(tableId)
+                }, (20000))
 
-            sendToRoomEmmiter(data)
-            return await reStart(data.data)
+                sendToRoomEmmiter(data)
+                return await reStart(data.data)
+            }
         }
     } catch (error) {
         logger.error("DECLARE_WINNWE ERROR ::::", error)
