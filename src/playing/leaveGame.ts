@@ -9,11 +9,11 @@ import { declareWinner } from './declareWinner';
 import { getCancleJob } from '../bull/cancleQueue/cancleRoundTimerQueue';
 import { cancleLeaveButton } from '../bull/cancleQueue/cancleLeaveButton';
 import { cancleTurnTimerJob } from '../bull/cancleQueue/cancleTurnTimerQueue';
-const leaveGame = async (data: any, socket: Socket) => {
+const leaveGame = async (data: any, socket: any) => {
     try {
-        logger.info(`LEAVE_GAME DATA :::: ${JSON.stringify(data)}`)
+        logger.info(`START FUNCTION : leaveGame :: DATA :: ${JSON.stringify(data)}`);
         let checkData: any = await validationLeaveGame(data.userData)
-        if (checkData.error) {
+        if (checkData?.error) {
             data = {
                 eventName: EVENT_NAME.POP_UP,
                 data: {
@@ -21,6 +21,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                 },
                 socket
             }
+            logger.error(`END : leaveGame :: DATA :: ${JSON.stringify(data.data)}`);
             return sendToSocketIdEmmiter(data);
         }
         let findTable: any = await Table.findById(data.userData.tableId)
@@ -36,6 +37,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                     },
                     socket
                 }
+                logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data.data)}`);
                 return sendToSocketIdEmmiter(data);
             }
             if (findTable.gameStatus == "ROUND_TIMER_START") {
@@ -43,7 +45,6 @@ const leaveGame = async (data: any, socket: Socket) => {
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     let check = await getCancleJob(findTable._id.toString())
                     if (check == true) {
-                        console.log("This is inside ::: findTable.playerInfo[0].userId")
                         await Table.findByIdAndUpdate(findTable._id, { $pull: { playerInfo: findTable.playerInfo[0] } })
                         let newTable = await Table.findByIdAndUpdate(findTable._id, { $set: { activePlayer: findTable.activePlayer - 1, gameStatus: "WATING" } }, { new: true })
                         await User.findByIdAndUpdate(data.userData.userData.userId, { $set: { tableId: "" } })
@@ -58,13 +59,13 @@ const leaveGame = async (data: any, socket: Socket) => {
                             },
                             socket
                         }
+                        logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
                         return sendToRoomEmmiter(data)
                     }
                 }
                 if (findTable.playerInfo[1].userId == data.userData.userData.userId) {
                     let check = await getCancleJob(findTable._id.toString())
                     if (check == true) {
-                        console.log("This is inside ::: findTable.playerInfo[1].userId")
                         await Table.findByIdAndUpdate(findTable._id, { $pull: { playerInfo: findTable.playerInfo[1] } })
                         let newTable = await Table.findByIdAndUpdate(findTable._id, { $set: { activePlayer: findTable.activePlayer - 1, gameStatus: "WATING" } }, { new: true })
                         await User.findByIdAndUpdate(data.userData.userData.userId, { $set: { tableId: "" } })
@@ -79,6 +80,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                             },
                             socket
                         }
+                        logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
                         return sendToRoomEmmiter(data)
                     }
                 }
@@ -92,6 +94,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                         tableId: data.userData.tableId,
                         isLeave: true
                     }
+                    logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
                     return declareWinner(data)
                 }
                 if (findTable.playerInfo[1].userId == data.userData.userData.userId) {
@@ -101,6 +104,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                         tableId: data.userData.tableId,
                         isLeave: true
                     }
+                    logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
                     return declareWinner(data)
                 }
             }
@@ -113,6 +117,7 @@ const leaveGame = async (data: any, socket: Socket) => {
                         tableId: data.userData.tableId,
                         isLeave: true
                     }
+                    logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
                     return declareWinner(data)
                 }
                 if (findTable.playerInfo[1].userId == data.userData.userData.userId) {
@@ -122,12 +127,13 @@ const leaveGame = async (data: any, socket: Socket) => {
                         tableId: data.userData.tableId,
                         isLeave: true
                     }
+                    logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
                     return declareWinner(data)
                 }
             }
         }
     } catch (error) {
-        logger.error(`LEAVE_GAME ERROR :::: ${error}`)
+        logger.error(`CATCH_ERROR  leaveGame :: ${data} , ${error}`);
     }
 }
 

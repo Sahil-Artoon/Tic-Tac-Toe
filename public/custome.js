@@ -35,7 +35,8 @@ document.getElementById('join-table-form').addEventListener('submit', (event) =>
     let data = {
         eventName: 'SIGN_UP',
         data: {
-            userName: userName
+            userName: userName,
+            isBot: false
         }
     }
     document.getElementById('userName').value = ''

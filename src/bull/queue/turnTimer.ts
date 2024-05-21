@@ -6,7 +6,7 @@ import { sendToRoomEmmiter } from "../../eventEmmitter";
 import { logger } from "../../logger";
 import { changeTurn } from "../../playing/changeTurn";
 
-const turnTimer = async (data: any) => {
+const turnTimer = async (data: any, socket: any) => {
     try {
         const tableId: any = data.tableId
         let roundTimerQueue = new Queue(QUEUE_EVENT.TURN_TIMER, redisOption);
@@ -17,7 +17,7 @@ const turnTimer = async (data: any) => {
         }
         roundTimerQueue.add(data, options)
         roundTimerQueue.process(async (data: any) => {
-            changeTurn({ tableId: data.data.tableId, play: false })
+            changeTurn({ tableId: data.data.tableId, play: false }, socket)
         })
     } catch (error) {
         logger.error("ROUND_TIMER QUEUE ERROR :::", error)

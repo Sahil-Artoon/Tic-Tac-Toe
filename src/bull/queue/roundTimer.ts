@@ -4,7 +4,7 @@ import { redisOption } from "../../connection/redisConnection";
 import { checkTurn } from "../../playing/checkTurn";
 import { QUEUE_EVENT } from "../../constant/queueConstant";
 
-const roundTimer = async (data: any) => {
+const roundTimer = async (data: any, socket: any) => {
     try {
         const tableId: any = data.tableId
         let roundTimerQueue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
@@ -19,7 +19,7 @@ const roundTimer = async (data: any) => {
                 tableId: data.data.tableId.toString(),
             }
             await setTimeout(() => {
-                checkTurn(data)
+                checkTurn(data, socket)
             }, 2000)
         })
     } catch (error) {

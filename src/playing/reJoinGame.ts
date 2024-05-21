@@ -10,11 +10,11 @@ import { validateRejoinData } from "../validation/rejoinValidation";
 import { getTurnTimerQueue } from "../bull/getQueue/getTurnTimerQueue";
 import { TIMER } from "../constant/timerConstant";
 
-const reJoinGame = async (data: any, socket: Socket) => {
+const reJoinGame = async (data: any, socket: any) => {
     try {
-        logger.info(`RE_JOIN EVENT DATA :::: ${JSON.stringify(data)}`)
+        logger.info(`START FUNCTION : reJoinGame :: DATA :: ${JSON.stringify(data)}`);
         let checkData = await validateRejoinData(data)
-        if (checkData.error) {
+        if (checkData?.error) {
             data = {
                 eventName: EVENT_NAME.POP_UP,
                 data: {
@@ -22,6 +22,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                 },
                 socket
             }
+            logger.error(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
             return sendToSocketIdEmmiter(data);
         }
         let findTable = await Table.findById(data.tableId)
@@ -42,6 +43,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         },
                         socket
                     }
+                    logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
             }
@@ -63,6 +65,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         },
                         socket
                     }
+                    logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "ROUND_TIMER_START") {
@@ -79,6 +82,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                             },
                             socket
                         }
+                        logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                         return sendToSocketIdEmmiter(data)
                     } else {
                         data = {
@@ -92,6 +96,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                             },
                             socket
                         }
+                        logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                         return sendToSocketIdEmmiter(data)
                     }
                 }
@@ -108,6 +113,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         },
                         socket
                     }
+                    logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "CHECK_TURN") {
@@ -124,6 +130,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         },
                         socket
                     }
+                    logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
 
@@ -141,6 +148,7 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         },
                         socket
                     }
+                    logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "WINNING" || findTable.gameStatus == "TIE") {
@@ -154,12 +162,13 @@ const reJoinGame = async (data: any, socket: Socket) => {
                         },
                         socket
                     }
+                    logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
             }
         }
     } catch (error) {
-        logger.error("RE_JOIN ERROR :::: ", error)
+        logger.error(`CATCH_ERROR  reJoinGame :: ${data} , ${error}`);
     }
 }
 

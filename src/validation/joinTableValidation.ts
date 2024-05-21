@@ -1,12 +1,19 @@
 import Joi from "joi";
+import { logger } from "../logger";
 
 const validateJoinTable = async (data: any) => {
-    const schema = Joi.object({
-        userId: Joi.string().alphanum().min(3).max(30).required(),
-    });
+    try {
+        logger.info(`START : validateJoinTable :: DATA :: ${JSON.stringify(data)}`);
+        const schema = Joi.object({
+            userId: Joi.string().alphanum().min(3).max(30).required(),
+        });
 
-    const validationResult = schema.validate(data);
-    return validationResult;
+        const validationResult = schema.validate(data);
+        logger.info(`END : validateJoinTable :: DATA :: ${JSON.stringify(validationResult)}`);
+        return validationResult;
+    } catch (error) {
+        logger.error(`CATCH_ERROR  validateJoinTable :: ${data} , ${error}`);
+    }
 }
 
 export { validateJoinTable };

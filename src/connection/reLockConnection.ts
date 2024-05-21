@@ -27,7 +27,7 @@ const RedLockConnction = async () => {
         redLock.on('error', async (error: any) => { logger.error("Error with redlock") });
         logger.info("Connected redLock Successfully !!!")
     } catch (error: any) {
-        logger.error('RedLockConnction Error : ', error);
+        logger.error(`CATCH_ERROR RedLockConnction :: ${error}`);
     };
 };
 
@@ -37,7 +37,7 @@ const ApplyLock = async (Path: string, LockId: string) => {
         const Lock = await redLock.acquire([LockId], 5 * 1000);
         return Lock;
     } catch (error: any) {
-        await logger.error('ApplyLock Error : ', error);
+        await logger.error(`CATCH_ERROR ApplyLock :: ${error}`);
     };
 };
 
@@ -46,7 +46,7 @@ const RemoveLock = async (Path: string, Lock: any) => {
         await logger.info("RemoveLock", JSON.stringify({ Path, LockId: Lock?.resources }));
         await Lock.release();
     } catch (error: any) {
-        await logger.error('RemoveLock Error : ', error);
+        await logger.error(`CATCH_ERROR RemoveLock :: ${error}`);
     };
 };
 

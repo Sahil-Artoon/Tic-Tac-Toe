@@ -9,11 +9,11 @@ import { changeTurn } from "./changeTurn"
 import { validatePlayGameData } from "../validation/playGameValidation"
 import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue"
 
-const playGame = async (data: any, socket: Socket) => {
+const playGame = async (data: any, socket: any) => {
     try {
-        logger.info(`PLAY_GAME EVENT DATA :::: ${JSON.stringify(data)}`)
+        logger.info(`START FUNCTION : playGame :: DATA :: ${JSON.stringify(data)}`);
         let checkData = await validatePlayGameData(data)
-        if (checkData.error) {
+        if (checkData?.error) {
             data = {
                 eventName: EVENT_NAME.POP_UP,
                 data: {
@@ -21,6 +21,7 @@ const playGame = async (data: any, socket: Socket) => {
                 },
                 socket
             }
+            logger.error(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
             return sendToSocketIdEmmiter(data);
         }
         await cancleTurnTimerJob(data.tableId.toString())
@@ -53,6 +54,7 @@ const playGame = async (data: any, socket: Socket) => {
                         symbol: "X",
                         isLeave: false
                     }
+                    logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
                     return await declareWinner(data)
                 } else if (checkWinnerorNot == "TIE") {
                     data = {
@@ -73,6 +75,7 @@ const playGame = async (data: any, socket: Socket) => {
                         userId: data.data.userId,
                         symbol: "TIE",
                     }
+                    logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
                     return await declareWinner(data)
                 }
                 data = {
@@ -88,7 +91,8 @@ const playGame = async (data: any, socket: Socket) => {
                     socket
                 }
                 sendToRoomEmmiter(data)
-                return await changeTurn({ tableId: findTableForCheckWinner._id, play: true })
+                logger.info(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
+                return await changeTurn({ tableId: findTableForCheckWinner._id, play: true }, socket)
             }
         }
 
@@ -121,6 +125,7 @@ const playGame = async (data: any, socket: Socket) => {
                         symbol: "O",
                         isLeave: false
                     }
+                    logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
                     return await declareWinner(data)
                 } else if (checkWinnerorNot == "TIE") {
                     data = {
@@ -141,6 +146,7 @@ const playGame = async (data: any, socket: Socket) => {
                         userId: data.data.userId,
                         symbol: "TIE",
                     }
+                    logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
                     return await declareWinner(data)
                 }
                 data = {
@@ -156,11 +162,12 @@ const playGame = async (data: any, socket: Socket) => {
                     socket
                 }
                 sendToRoomEmmiter(data)
-                return await changeTurn({ tableId: findTableForCheckWinner._id })
+                logger.info(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
+                return await changeTurn({ tableId: findTableForCheckWinner._id }, socket)
             }
         }
     } catch (error) {
-        logger.error("PLAY_GAME ERROR: ", error)
+        logger.error(`CATCH_ERROR  playGame :: ${data} , ${error}`);
     }
 }
 export { playGame }

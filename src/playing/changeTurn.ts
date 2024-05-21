@@ -6,10 +6,12 @@ import { turnTimer } from "../bull/queue/turnTimer";
 import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue";
 import { TIMER } from "../constant/timerConstant";
 import { declareWinner } from "./declareWinner";
+import { botPlay } from "../bot/botPlay";
+import { User } from "../model/userModel";
 
-const changeTurn = async (data: any) => {
+const changeTurn = async (data: any, socket: any) => {
     try {
-        logger.info(`CHANGE_TURN DATA :::: ${JSON.stringify(data)}`);
+        logger.info(`START FUNCTION : changeTurn :: DATA :: ${JSON.stringify(data)}`);
         let findTable = await Table.findById(data.tableId)
         if (findTable) {
             if (findTable.currentTurnSeatIndex == 0) {
@@ -22,6 +24,7 @@ const changeTurn = async (data: any) => {
                             symbol: checkData?.playerInfo[1].symbol,
                             isLeave: false
                         }
+                        logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);
                         return declareWinner(data)
                     }
                 }
@@ -45,16 +48,20 @@ const changeTurn = async (data: any) => {
                 if (result == true) {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER + 2
+                        time: TIMER.TURN_TIMER
                     }
-                    await turnTimer(data)
+                    await turnTimer(data, socket)
                 }
                 else {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER + 2
+                        time: TIMER.TURN_TIMER
                     }
-                    await turnTimer(data)
+                    await turnTimer(data, socket)
+                }
+                let findUser = await User.findById(updateTable?.playerInfo[1].userId)
+                if (findUser?.isBot == true) {
+                    await botPlay(data.tableId, socket)
                 }
             }
             if (findTable.currentTurnSeatIndex == 1) {
@@ -67,6 +74,7 @@ const changeTurn = async (data: any) => {
                             symbol: checkData?.playerInfo[0].symbol,
                             isLeave: false
                         }
+                        logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);
                         return declareWinner(data)
                     }
                 }
@@ -90,21 +98,26 @@ const changeTurn = async (data: any) => {
                 if (result == true) {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER + 2
+                        time: TIMER.TURN_TIMER
                     }
-                    await turnTimer(data)
+                    await turnTimer(data, socket)
                 }
                 else {
                     data = {
                         tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER + 2
+                        time: TIMER.TURN_TIMER
                     }
-                    await turnTimer(data)
+                    await turnTimer(data, socket)
+                }
+                let findUser = await User.findById(updateTable?.playerInfo[0].userId)
+                if (findUser?.isBot == true) {
+                    await botPlay(data.tableId, socket)
                 }
             }
+            logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);
         }
     } catch (error) {
-        logger.error(`CHANGE_TURN ERROR :::: ${error}`)
+        logger.error(`CATCH_ERROR  changeTurn :: ${data} , ${error}`);
     }
 }
 

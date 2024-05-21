@@ -10,7 +10,7 @@ import { leaveGame } from "../playing/leaveGame";
 const eventHandler = async (socket: Socket) => {
     try {
         socket.onAny((eventName: String, data: any) => {
-            logger.info(`::::::::::::::::::::::::::: Event Name is : ${eventName} ::::::::::::::::::::::::::: Request Data : ${JSON.stringify(data)}`);
+            logger.info(`Request :: Event Name is : ${eventName} :: Data : ${JSON.stringify(data)}`);
             switch (eventName) {
                 case EVENT_NAME.SIGN_UP:
                     signUp(data, socket)

@@ -7,7 +7,7 @@ import { User } from "../model/userModel";
 
 const declareWinner = async (data: any) => {
     try {
-        logger.info(`DECLARE_WINNWE DATA :::: ${JSON.stringify(data)}`)
+        logger.info(`START FUNCTION : declareWinner :: DATA :: ${JSON.stringify(data)}`);
         let tableId = data.tableId
         let winnerTable = await Table.findById(tableId)
         if (winnerTable) {
@@ -28,6 +28,7 @@ const declareWinner = async (data: any) => {
                     deleteTable(tableId)
                 }, (20000))
                 sendToRoomEmmiter(data)
+                logger.info(`END : declareWinner :: DATA :: ${JSON.stringify(data.data)}`);
                 return await reStart(data.data)
             }
             if (data.symbol == "O" || data.symbol == "X") {
@@ -49,11 +50,12 @@ const declareWinner = async (data: any) => {
                 }, (20000))
 
                 sendToRoomEmmiter(data)
+                logger.info(`END : declareWinner :: DATA :: ${JSON.stringify(data.data)}`);
                 return await reStart(data.data)
             }
         }
     } catch (error) {
-        logger.error("DECLARE_WINNWE ERROR ::::", error)
+        logger.error(`CATCH_ERROR  declareWinner :: ${data} , ${error}`);
     }
 }
 
@@ -62,7 +64,7 @@ const deleteTable = async (tableId: String) => {
     try {
         await Table.findByIdAndDelete(tableId)
     } catch (error) {
-        logger.error("WINNER_TABLE_DELETE_ERROR", error)
+        logger.error(`CATCH_ERROR  deleteTable :: ${tableId} , ${error}`);
     }
 }
 

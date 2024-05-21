@@ -15,7 +15,7 @@ const socketConnection = () => {
             });
         })
     } catch (error) {
-        logger.error("error of socket connection :::", error)
+        logger.error(`CATCH_ERROR socketConnection :: ${error}`);
     }
 }
 

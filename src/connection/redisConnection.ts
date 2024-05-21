@@ -16,10 +16,10 @@ const connectRedis = () => {
             logger.info("Redis Connected...");
         })
         redis.on('error', (error: any) => {
-            logger.error('Redis connection error:', error);
+            logger.error(`CATCH_ERROR connectRedis :: ${error}`);
         });
     } catch (error) {
-        logger.error('Redis connection error:', error);
+        logger.error(`CATCH_ERROR connectRedis :: ${error}`);
     }
 }
 

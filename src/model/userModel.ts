@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema({
     },
     tableId: {
         type: String
+    },
+    isBot:{
+        type: Boolean,
     }
 }, { timestamps: true })
 
