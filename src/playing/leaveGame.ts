@@ -59,7 +59,7 @@ const leaveGame = async (data: any, socket: any) => {
                             },
                             socket
                         }
-                        logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
+                        logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data.data)}`);
                         return sendToRoomEmmiter(data)
                     }
                 }
@@ -80,7 +80,7 @@ const leaveGame = async (data: any, socket: any) => {
                             },
                             socket
                         }
-                        logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data)}`);
+                        logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data.data)}`);
                         return sendToRoomEmmiter(data)
                     }
                 }

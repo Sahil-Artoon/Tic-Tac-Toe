@@ -20,7 +20,7 @@ app.get('/', async (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'))
 
 })
-const port = process.env.PORT || 5000
+const port = process.argv[2] || process.env.PORT || 5000
 server.listen(port, async () => {
   logger.info(`server listening on port http://localhost:${port}   `)
   // const tunnel = await localtunnel({ port: 5000 });

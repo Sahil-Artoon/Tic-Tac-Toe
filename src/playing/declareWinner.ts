@@ -26,7 +26,7 @@ const declareWinner = async (data: any) => {
                 }
                 setTimeout(() => {
                     deleteTable(tableId)
-                }, (20000))
+                }, (60000))
                 sendToRoomEmmiter(data)
                 logger.info(`END : declareWinner :: DATA :: ${JSON.stringify(data.data)}`);
                 return await reStart(data.data)
@@ -47,7 +47,7 @@ const declareWinner = async (data: any) => {
                 }
                 setTimeout(() => {
                     deleteTable(tableId)
-                }, (20000))
+                }, (60000))
 
                 sendToRoomEmmiter(data)
                 logger.info(`END : declareWinner :: DATA :: ${JSON.stringify(data.data)}`);
