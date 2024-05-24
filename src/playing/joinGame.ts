@@ -171,7 +171,6 @@ const joinGame = async (data: any, socket: any) => {
             let dataOfQueue: any = await redisGet(`${REDIS_KEY.QUEUE}`)
             dataOfQueue = JSON.parse(dataOfQueue)
             if (dataOfQueue) {
-                // console.log("Data of Queue: ", dataOfQueue._id)
                 dataOfQueue._id.push(dataOfTable._id)
                 await redisDel(`${REDIS_KEY.QUEUE}`)
                 await redisSet(`${REDIS_KEY.QUEUE}`, JSON.stringify(dataOfQueue))
@@ -203,7 +202,6 @@ const joinGame = async (data: any, socket: any) => {
                 console.log("DataOfSocket._id is :::", dataOfTable._id)
                 socket.join(dataOfTable._id)
                 sendToSocketIdEmmiter(data)
-                // console.log("This is after Responce !!!")
                 data = {
                     _id: dataOfTable._id,
                     time: TIMER.BOT_TIMER

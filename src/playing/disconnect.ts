@@ -9,7 +9,7 @@ const disconnect = async (socket: any) => {
         if (getCurrentUser) {
             await User.findOneAndUpdate(
                 { socketId: socket.id },
-                { socketId: '', tableId: "" }
+                { socketId: '', tableId: '' }
             )
         }
         const checkTable = await Table.find({ activePlayer: 0 })

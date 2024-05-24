@@ -53,4 +53,5 @@ const signUp = async (data: any, socket: any) => {
         logger.error(`CATCH_ERROR  signUp :: ${JSON.stringify(data)} , ${error}`);
     }
 }
+
 export { signUp }

@@ -15,7 +15,6 @@ const changeTurn = async (data: any, socket: any) => {
         logger.info(`START FUNCTION : changeTurn :: DATA :: ${JSON.stringify(data)}`);
         let finalTable: any = await redisGet(`${data.tableId}`)
         finalTable = JSON.parse(finalTable)
-        console.log("change turn table :::: ", finalTable);
         if (finalTable) {
             if (finalTable.currentTurnSeatIndex == 0) {
                 let findTable: any = await redisGet(`${finalTable._id}`)
@@ -24,8 +23,6 @@ const changeTurn = async (data: any, socket: any) => {
                     findTable.playerInfo[0].turnMiss = findTable.playerInfo[0].turnMiss + 1
                     await redisDel(`${findTable._id}`)
                     await redisSet(`${findTable._id}`, JSON.stringify(findTable));
-                    console.log("==============>>", findTable);
-                    console.log("----------------------->>>>>>>>", findTable?.playerInfo[0]?.turnMiss)
                     if (findTable?.playerInfo[0]?.turnMiss == 3) {
                         data = {
                             tableId: findTable?._id,
@@ -53,9 +50,6 @@ const changeTurn = async (data: any, socket: any) => {
                         seatIndex: findTable?.currentTurnSeatIndex
                     }
                 }
-
-                console.log("changeTurn ::: data send :::: ---->    ", data)
-
                 sendToRoomEmmiter(data)
 
                 data = {

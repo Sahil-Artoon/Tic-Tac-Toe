@@ -149,7 +149,6 @@ const reJoinGame = async (data: any, socket: any) => {
                     logger.info(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
                     return sendToSocketIdEmmiter(data)
                 }
-
                 if (findTable.gameStatus == "PLAYING") {
                     let getpanddingTime: any = await getTurnTimerQueue(findTable._id)
                     data = {

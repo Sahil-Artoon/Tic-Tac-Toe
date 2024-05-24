@@ -9,9 +9,7 @@ const cancleTurnTimerJob = async (jobId: string) => {
         logger.info("START cancleTurnTimerJob :::: ", jobId)
         const queue = new Queue(QUEUE_EVENT.TURN_TIMER, redisOption);
         const job = await queue.getJob(jobId);
-        console.log("THis is Job :::::: in cancleTurnTimerJob ::::: ", job)
         if (job) {
-            logger.info(`END cancleTurnTimerJob :::: ${JSON.stringify(jobId)}`)
             await job?.remove();
             return true
         }

@@ -41,9 +41,6 @@ const checkTurn = async (data: any, socket: any) => {
             tableId: dataOfTable?._id,
             time: TIMER.TURN_TIMER
         }
-        console.log(":::::::::::::::::::::::::::::::::::::::::::::")
-        console.log("This is In checkTurn data of TurnTimer ", data)
-        console.log(":::::::::::::::::::::::::::::::::::::::::::::")
         turnTimer(data, socket)
         if (ramdomNumberForGiveUserTurn == 1) {
             let findUser: any = await redisGet(`${dataOfTable?.playerInfo[1].userId}`)

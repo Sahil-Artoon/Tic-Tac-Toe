@@ -62,7 +62,6 @@ const leaveGame = async (data: any, socket: any) => {
                         let dataOfQueue: any = await redisGet(`${REDIS_KEY.QUEUE}`)
                         dataOfQueue = JSON.parse(dataOfQueue)
                         if (dataOfQueue) {
-                            // console.log("Data of Queue: ", dataOfQueue._id)
                             dataOfQueue._id.push(findTable._id)
                             await redisDel(`${REDIS_KEY.QUEUE}`)
                             await redisSet(`${REDIS_KEY.QUEUE}`, JSON.stringify(dataOfQueue))
@@ -106,7 +105,6 @@ const leaveGame = async (data: any, socket: any) => {
                         let dataOfQueue: any = await redisGet(`${REDIS_KEY.QUEUE}`)
                         dataOfQueue = JSON.parse(dataOfQueue)
                         if (dataOfQueue) {
-                            // console.log("Data of Queue: ", dataOfQueue._id)
                             dataOfQueue._id.push(findTable._id)
                             await redisDel(`${REDIS_KEY.QUEUE}`)
                             await redisSet(`${REDIS_KEY.QUEUE}`, JSON.stringify(dataOfQueue))

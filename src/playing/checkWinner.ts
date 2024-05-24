@@ -41,10 +41,6 @@ const checkWinner = async (findTableForCheckWinner: any) => {
             logger.info(`END : checkWinner :: DATA :: TIE`);
             return "TIE"
         }
-        else {
-            logger.info(`END : checkWinner :: DATA :: CONTINUE`);
-            return false;
-        }
     } catch (error) {
         logger.error(`CATCH_ERROR  checkWinner :: ${findTableForCheckWinner} , ${error}`);
     }

@@ -27,9 +27,7 @@ const playGame = async (data: any, socket: any) => {
         }
 
         let tableId:any = data.tableId
-        console.log("***********>>>", tableId);
         let canelTimer = await cancleTurnTimerJob(tableId)
-        logger.info("::>>>>>>>>>>", JSON.stringify(canelTimer));
         if (data.sign == "X") {
             let findTable: any = await redisGet(`${tableId}`)
             findTable = JSON.parse(findTable)

@@ -80,7 +80,6 @@ const declareWinner = async (data: any) => {
     }
 }
 
-
 const deleteTable = async (tableId: String) => {
     try {
         await redisDel(`${tableId}`)
