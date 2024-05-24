@@ -16,7 +16,7 @@ const checkWinner = async (findTableForCheckWinner: any) => {
             logger.info(`END : checkWinner :: DATA :: X`);
             return "X"
         }
-        if (findTableForCheckWinner.playingData[0].symbol == "O" && findTableForCheckWinner.playingData[1].symbol == "O" && findTableForCheckWinner.playingData[2].symbol == "O" ||//1
+        else if (findTableForCheckWinner.playingData[0].symbol == "O" && findTableForCheckWinner.playingData[1].symbol == "O" && findTableForCheckWinner.playingData[2].symbol == "O" ||//1
             findTableForCheckWinner.playingData[3].symbol == "O" && findTableForCheckWinner.playingData[4].symbol == "O" && findTableForCheckWinner.playingData[5].symbol == "O" ||//2
             findTableForCheckWinner.playingData[6].symbol == "O" && findTableForCheckWinner.playingData[7].symbol == "O" && findTableForCheckWinner.playingData[8].symbol == "O" ||//3
             findTableForCheckWinner.playingData[0].symbol == "O" && findTableForCheckWinner.playingData[3].symbol == "O" && findTableForCheckWinner.playingData[6].symbol == "O" ||//4
@@ -28,7 +28,7 @@ const checkWinner = async (findTableForCheckWinner: any) => {
             logger.info(`END : checkWinner :: DATA :: O`);
             return "O"
         }
-        if (
+       else if (
             findTableForCheckWinner.playingData[0].symbol != "" && findTableForCheckWinner.playingData[1].symbol != "" && findTableForCheckWinner.playingData[2].symbol != "" &&//1
             findTableForCheckWinner.playingData[3].symbol != "" && findTableForCheckWinner.playingData[4].symbol != "" && findTableForCheckWinner.playingData[5].symbol != "" &&//2
             findTableForCheckWinner.playingData[6].symbol != "" && findTableForCheckWinner.playingData[7].symbol != "" && findTableForCheckWinner.playingData[8].symbol != "" &&//3
@@ -40,6 +40,10 @@ const checkWinner = async (findTableForCheckWinner: any) => {
         ) {
             logger.info(`END : checkWinner :: DATA :: TIE`);
             return "TIE"
+        }
+        else {
+            logger.info(`END : checkWinner :: DATA :: CONTINUE`);
+            return false;
         }
     } catch (error) {
         logger.error(`CATCH_ERROR  checkWinner :: ${findTableForCheckWinner} , ${error}`);

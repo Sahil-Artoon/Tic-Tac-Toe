@@ -18,7 +18,7 @@ const reStart = (data: any) => {
             data = {
                 eventName: EVENT_NAME.RE_START,
                 data: {
-                    _id: data.data._id.toString()
+                    _id: data.data._id
                 }
             }
             sendToRoomEmmiter(data)

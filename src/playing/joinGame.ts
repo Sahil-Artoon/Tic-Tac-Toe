@@ -10,6 +10,9 @@ import { leaveButton } from "../bull/queue/leaveButton"
 import { addBotQueue } from "../bull/queue/botTimerQueue"
 import { TIMER } from "../constant/timerConstant"
 import { cancleBotTimer } from "../bull/cancleQueue/cancleBotQueue"
+import { generateRandomId } from "../common/objectId"
+import { REDIS_KEY } from "../constant/redisKey"
+import { redisDel, redisGet, redisSet } from "../redisOption"
 
 const joinGame = async (data: any, socket: any) => {
     try {
@@ -28,7 +31,8 @@ const joinGame = async (data: any, socket: any) => {
             return sendToSocketIdEmmiter(data);
         }
 
-        let findUser = await User.findById(userId)
+        let findUser: any = await redisGet(`${userId}`)
+        findUser = JSON.parse(findUser)
         if (!findUser) {
             data = {
                 eventName: EVENT_NAME.POP_UP,
@@ -41,142 +45,105 @@ const joinGame = async (data: any, socket: any) => {
             return sendToSocketIdEmmiter(data);
         }
 
-        let checkTable = await Table.findOne({ activePlayer: { $lte: 1 } })
+        let checkTable: any = await redisGet(`${REDIS_KEY.QUEUE}`)
+        checkTable = JSON.parse(checkTable)
         if (checkTable) {
-            if (findUser.tableId == checkTable._id.toString()) {
-                data = {
-                    eventName: EVENT_NAME.POP_UP,
-                    data: {
-                        message: "User Already in Table !!!",
-                        return: true
-                    },
-                    socket
-                }
-                logger.error(`END : joinGame :: DATA :: ${JSON.stringify(data.data)}`);
-                return sendToSocketIdEmmiter(data);
-            }
-            let symbol;
-            if (checkTable.playerInfo[0].symbol == "X") {
-                symbol = "O"
+            await redisDel(`${REDIS_KEY.QUEUE}`)
+            console.log("CheckTable Is::::", checkTable._id.length)
+            if (checkTable._id.length > 1) {
+                console.log("This is inside length > 1")
             } else {
-                symbol = "X"
-            }
-            if (findUser?.isBot == true) {
-                let updateTable = await Table.findByIdAndUpdate({ _id: checkTable._id }, {
-                    $push: {
-                        playerInfo: {
-                            userId: findUser._id,
-                            userName: findUser.userName,
-                            isActive: true,
-                            symbol: symbol,
-                            turnMiss: 0
-                        }
-                    },
-                    activePlayer: 2,
-                    gameStatus: "WATING"
-                }, { new: true })
-                await User.findByIdAndUpdate(findUser._id, { $set: { tableId: checkTable._id.toString() } });
-                if (updateTable) {
-                    // const newTable = await Table.findById(updateTable._id)
-                    // if (newTable) {
-                    //     data = {
-                    //         eventName: EVENT_NAME.JOIN_TABLE,
-                    //         data: {
-                    //             data: newTable,
-                    //             message: "ok",
-                    //             status: "waiting"
-                    //         },
-                    //         socket
-                    //     }
-                    // }
-                    await Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" })
-                    const currentTable = await Table.findById(updateTable._id)
-                    if (currentTable) {
-                        socket.join(currentTable._id.toString())
-                        data = {
-                            eventName: EVENT_NAME.ROUND_TIMER,
-                            data: {
-                                _id: currentTable._id.toString(),
-                                data: currentTable,
-                                message: "ok",
-                                roundTimer: 10
-                            },
-                            socket
-                        }
-                        sendToRoomEmmiter(data)
-                        data = {
-                            tableId: updateTable._id,
-                            time: 6000
-                        }
-                        leaveButton(data)
-                        data = {
-                            tableId: updateTable._id,
-                            time: 10000
-                        }
-                        await roundTimer(data, socket)
+                console.log("This is inside length < 1")
+                if (findUser.tableId == checkTable._id) {
+                    data = {
+                        eventName: EVENT_NAME.POP_UP,
+                        data: {
+                            message: "User Already in Table !!!",
+                            return: true
+                        },
+                        socket
                     }
+                    logger.error(`END : joinGame :: DATA :: ${JSON.stringify(data.data)}`);
+                    return sendToSocketIdEmmiter(data);
                 }
-            }
-            else {
-                await cancleBotTimer(checkTable._id.toString())
-                let updateTable = await Table.findByIdAndUpdate({ _id: checkTable._id }, {
-                    $push: {
-                        playerInfo: {
-                            userId: findUser._id,
-                            userName: findUser.userName,
-                            isActive: true,
-                            symbol: symbol,
-                            turnMiss: 0
-                        }
-                    },
-                    activePlayer: 2,
-                    gameStatus: "WATING"
-                }, { new: true })
-                await User.findByIdAndUpdate(findUser._id, { $set: { tableId: checkTable._id.toString() } });
-                if (updateTable) {
-                    const newTable = await Table.findById(updateTable._id)
-                    if (newTable) {
-                        data = {
-                            eventName: EVENT_NAME.JOIN_TABLE,
-                            data: {
-                                data: newTable,
-                                message: "ok",
-                                status: "waiting"
-                            },
-                            socket
-                        }
-                        sendToSocketIdEmmiter(data)
-                    }
-                    await Table.updateOne({ _id: updateTable._id }, { gameStatus: "ROUND_TIMER_START" })
-                    const currentTable = await Table.findById(updateTable._id)
-                    if (currentTable) {
-                        socket.join(currentTable._id.toString())
-                        data = {
-                            eventName: EVENT_NAME.ROUND_TIMER,
-                            data: {
-                                _id: currentTable._id.toString(),
-                                data: currentTable,
-                                message: "ok",
-                                roundTimer: 10
-                            },
-                            socket
-                        }
-                        sendToRoomEmmiter(data)
-                        data = {
-                            tableId: updateTable._id,
-                            time: 6000
-                        }
-                        leaveButton(data)
-                        data = {
-                            tableId: updateTable._id,
-                            time: 10000
-                        }
-                        await roundTimer(data, socket)
-                    }
+                let findTable: any = await redisGet(`${checkTable._id[0]}`)
+                findTable = JSON.parse(findTable)
+                let symbol;
+                if (findTable.playerInfo[0].symbol == "X") {
+                    symbol = "O"
+                } else {
+                    symbol = "X"
                 }
+                if (findUser.isBot == false) {
+                    await cancleBotTimer(findTable._id)
+                }
+                findTable.playerInfo.push(
+                    {
+                        userId: findUser._id,
+                        userName: findUser.userName,
+                        isActive: true,
+                        symbol: symbol,
+                        turnMiss: 0
+                    }
+                )
+                findTable.activePlayer = 2;
+                findTable.gameStatus = "WATING"
+                await redisDel(`${findTable._id}`)
+                await redisSet(`${findTable._id}`, JSON.stringify(findTable))
+                findUser.tableId = findTable._id
+                await redisDel(`${findUser._id}`)
+                await redisSet(`${findUser._id}`, JSON.stringify(findUser))
+                if (findUser.isBot == false) {
+                    data = {
+                        eventName: EVENT_NAME.JOIN_TABLE,
+                        data: {
+                            data: findTable,
+                            message: "ok",
+                            status: "waiting"
+                        },
+                        socket
+                    }
+                    sendToSocketIdEmmiter(data)
+                }
+                findTable.gameStatus = "ROUND_TIMER_START"
+                await redisDel(`${findTable._id}`)
+                await redisSet(`${findTable._id}`, JSON.stringify(findTable))
+                let currentTable: any = await redisGet(`${findTable._id}`)
+                currentTable = JSON.parse(currentTable)
+                if (currentTable) {
+                    console.log("currentTable._id is ::::", currentTable._id)
+                    socket.join(currentTable._id)
+                    data = {
+                        eventName: EVENT_NAME.ROUND_TIMER,
+                        data: {
+                            _id: currentTable._id,
+                            data: currentTable,
+                            message: "ok",
+                            roundTimer: 10
+                        },
+                        socket
+                    }
+                    sendToRoomEmmiter(data)
+                    data = {
+                        tableId: currentTable._id,
+                        time: 6000
+                    }
+                    leaveButton(data)
+                    data = {
+                        tableId: currentTable._id,
+                        time: 10000
+                    }
+                    await roundTimer(data, socket)
+                }
+
+
             }
         } else {
-            let generateTable = await Table.create({
+            let findUser: any = await redisGet(`${userId}`)
+            findUser = JSON.parse(findUser)
+            let _id: string = generateRandomId()
+            let dataOfTable = {
+                _id: `${REDIS_KEY.TABLE}:${_id}`,
                 playerInfo: [{
                     userId: findUser._id,
                     userName: findUser.userName,
@@ -199,22 +166,46 @@ const joinGame = async (data: any, socket: any) => {
                 gameStatus: "WATING",
                 currentTurnSeatIndex: null,
                 currentTurnUserId: null
-            })
-            await User.findByIdAndUpdate(generateTable.playerInfo[0].userId, { $set: { tableId: generateTable._id.toString() } });
-            if (generateTable) {
+            }
+            await redisSet(`${REDIS_KEY.TABLE}:${_id}`, JSON.stringify(dataOfTable))
+            let dataOfQueue: any = await redisGet(`${REDIS_KEY.QUEUE}`)
+            dataOfQueue = JSON.parse(dataOfQueue)
+            if (dataOfQueue) {
+                // console.log("Data of Queue: ", dataOfQueue._id)
+                dataOfQueue._id.push(dataOfTable._id)
+                await redisDel(`${REDIS_KEY.QUEUE}`)
+                await redisSet(`${REDIS_KEY.QUEUE}`, JSON.stringify(dataOfQueue))
+            } else {
+                dataOfQueue = {
+                    _id: [dataOfTable._id]
+                }
+                await redisSet(`${REDIS_KEY.QUEUE}`, JSON.stringify(dataOfQueue))
+            }
+            let dataOfUser = {
+                _id: userId,
+                userName: findUser.userName,
+                socketId: findUser.socketId,
+                tableId: dataOfTable._id,
+                isBot: findUser.isBot
+            }
+            await redisDel(`${userId}`)
+            data = await redisSet(`${userId}`, JSON.stringify(dataOfUser));
+            if (data) {
                 data = {
                     eventName: EVENT_NAME.JOIN_TABLE,
                     data: {
-                        data: generateTable,
+                        data: dataOfTable,
                         message: "ok",
                         status: "Waiting"
                     },
                     socket
                 }
-                socket.join(generateTable._id.toString())
+                console.log("DataOfSocket._id is :::", dataOfTable._id)
+                socket.join(dataOfTable._id)
                 sendToSocketIdEmmiter(data)
+                // console.log("This is after Responce !!!")
                 data = {
-                    _id: generateTable._id.toString(),
+                    _id: dataOfTable._id,
                     time: TIMER.BOT_TIMER
                 }
                 await addBotQueue(data, socket)
@@ -222,7 +213,7 @@ const joinGame = async (data: any, socket: any) => {
             logger.info(`END : joinGame :: DATA :: ${JSON.stringify(data)}`);
         }
     } catch (error) {
-        logger.error(`CATCH_ERROR joinGame :: ${data} , ${error}`);
+        logger.error(`CATCH_ERROR joinGame :: ${data}, ${error}`);
     }
 }
 

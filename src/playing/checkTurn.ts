@@ -6,6 +6,7 @@ import { turnTimer } from "../bull/queue/turnTimer";
 import { TIMER } from "../constant/timerConstant";
 import { botPlay } from "../bot/botPlay";
 import { User } from "../model/userModel";
+import { redisDel, redisGet, redisSet } from "../redisOption";
 
 const checkTurn = async (data: any, socket: any) => {
     try {
@@ -17,16 +18,18 @@ const checkTurn = async (data: any, socket: any) => {
         } else {
             ramdomNumberForGiveUserTurn = 0;
         }
-        let dataOfTable = await Table.findById(data.tableId)
-        await Table.findByIdAndUpdate(dataOfTable?._id, {
-            currentTurnSeatIndex: ramdomNumberForGiveUserTurn,
-            currentTurnUserId: dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].userId,
-            gameStatus: "CHECK_TURN"
-        })
+        let dataOfTable: any = await redisGet(`${data.tableId}`)
+        dataOfTable = JSON.parse(dataOfTable)
+
+        dataOfTable.currentTurnSeatIndex = ramdomNumberForGiveUserTurn
+        dataOfTable.currentTurnUserId = dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].userId
+        dataOfTable.gameStatus = "CHECK_TURN"
+        await redisDel(`${dataOfTable._id}`)
+        await redisSet(`${dataOfTable._id}`, JSON.stringify(dataOfTable))
         data = {
             eventName: EVENT_NAME.CHECK_TURN,
             data: {
-                _id: dataOfTable?._id.toString(),
+                _id: dataOfTable?._id,
                 symbol: dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].symbol,
                 userID: dataOfTable?.playerInfo[ramdomNumberForGiveUserTurn].userId,
                 time: TIMER.TURN_TIMER,
@@ -35,18 +38,23 @@ const checkTurn = async (data: any, socket: any) => {
         }
         sendToRoomEmmiter(data)
         data = {
-            tableId: dataOfTable?._id.toString(),
-            time: TIMER.TURN_TIMER + 2
+            tableId: dataOfTable?._id,
+            time: TIMER.TURN_TIMER
         }
+        console.log(":::::::::::::::::::::::::::::::::::::::::::::")
+        console.log("This is In checkTurn data of TurnTimer ", data)
+        console.log(":::::::::::::::::::::::::::::::::::::::::::::")
         turnTimer(data, socket)
         if (ramdomNumberForGiveUserTurn == 1) {
-            let findUser = await User.findById(dataOfTable?.playerInfo[1].userId)
+            let findUser: any = await redisGet(`${dataOfTable?.playerInfo[1].userId}`)
+            findUser = JSON.parse(findUser)
             if (findUser?.isBot == true) {
                 botPlay(dataOfTable?._id, socket)
             }
         }
         if (ramdomNumberForGiveUserTurn == 0) {
-            let findUser = await User.findById(dataOfTable?.playerInfo[0].userId)
+            let findUser: any = await redisGet(`${dataOfTable?.playerInfo[0].userId}`)
+            findUser = JSON.parse(findUser)
             if (findUser?.isBot == true) {
                 botPlay(dataOfTable?._id, socket)
             }

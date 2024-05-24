@@ -149,9 +149,6 @@ const signUpGame = (data) => {
             userId,
             userName
         }
-
-        setUserSession('User', data, 5)
-
         document.querySelector('.form-container').style.display = 'none'
         document.querySelector('.play-btn').style.display = 'block'
     }
@@ -237,7 +234,12 @@ const printValue = (data) => {
     }
 }
 const changeTurn = (data) => {
-    console.log(`Data of changeTurn is :::${JSON.stringify(data)}`)
+    console.log(`Data of changeTurn is ::: ${JSON.stringify(data)}`)
+    console.log(":::::::::::::::::::::::::::::::")
+    console.log(`Data of changeTurn is :::`, data)
+    console.log("UserId is ::::", userId)
+    console.log(":::::::::::::::::::::::::::::::")
+
     if (data.data.symbol == symbol) {
         enableBoard()
         document.getElementById('winner').innerHTML = "It's your Turn.";
@@ -250,7 +252,7 @@ const changeTurn = (data) => {
     }
 }
 const declareWinner = (data) => {
-    console.log(`Data of DeclareWinner is :::${JSON.stringify(data)}`)
+    console.log(`Data of DeclareWinner is ::: ${JSON.stringify(data)}`)
     if (data.message == "Winner") {
         document.getElementById('main-timer').style.display = "none"
         if (data.isLeave == true) {

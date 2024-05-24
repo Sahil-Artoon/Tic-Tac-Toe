@@ -1,6 +1,11 @@
+import { required } from "joi";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        required: true
+    },
     userName: {
         type: String,
         required: true
@@ -11,7 +16,7 @@ const userSchema = new mongoose.Schema({
     tableId: {
         type: String
     },
-    isBot:{
+    isBot: {
         type: Boolean,
     }
 }, { timestamps: true })

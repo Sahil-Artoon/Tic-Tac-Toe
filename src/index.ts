@@ -23,15 +23,6 @@ app.get('/', async (req, res) => {
 const port = process.argv[2] || process.env.PORT || 5000
 server.listen(port, async () => {
   logger.info(`server listening on port http://localhost:${port}   `)
-  // const tunnel = await localtunnel({ port: 5000 });
-
-  // logger.info(`Localtunnel is running at ${tunnel.url}`);
-
-  // // Close the tunnel when the process is terminated
-  // process.on('SIGINT', () => {
-  //   tunnel.close();
-  //   process.exit();
-  // });
 })
 
 export { io }

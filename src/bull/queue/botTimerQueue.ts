@@ -18,7 +18,7 @@ const addBotQueue = (data: any, socket: any) => {
             let dataOfBot = await botSignUp(socket);
             if (dataOfBot) {
                 data = {
-                    userId: dataOfBot?._id.toString()
+                    userId: dataOfBot?._id
                 }
                 await joinBotInTable(data, socket)
             } else {

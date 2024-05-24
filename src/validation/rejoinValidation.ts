@@ -12,7 +12,6 @@ const validateRejoinData = async (data: any) => {
                 isActive: Joi.boolean().required(),
                 symbol: Joi.string().required(),
                 turnMiss: Joi.number().required(),
-                _id: Joi.string().required()
             }).required()
         });
 

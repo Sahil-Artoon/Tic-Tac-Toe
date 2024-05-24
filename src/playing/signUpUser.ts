@@ -1,9 +1,10 @@
-import { Socket } from "socket.io"
 import { logger } from "../logger";
-import { sendToRoomEmmiter, sendToSocketIdEmmiter } from "../eventEmmitter";
-import { User } from "../model/userModel";
+import { sendToSocketIdEmmiter } from "../eventEmmitter";
 import { EVENT_NAME } from "../constant/eventName";
 import { signUpValidation } from "../validation/signUpValidation";
+import { generateRandomId } from "../common/objectId";
+import { redisGet, redisSet } from "../redisOption";
+import { REDIS_KEY } from "../constant/redisKey";
 
 const signUp = async (data: any, socket: any) => {
     logger.info(`START FUNCTION : signUp :: DATA :: ${JSON.stringify(data)}`);
@@ -23,60 +24,33 @@ const signUp = async (data: any, socket: any) => {
         }
 
         let { userName, isBot } = data;
-        if (isBot == true) {
-            let newUser = await User.create({
-                userName,
-                socketId: socket.id,
-                tableId: "",
-                isBot: true
-            })
+        let _id: string = await generateRandomId()
+        data = {
+            _id: `${REDIS_KEY.USER}:${_id}`,
+            userName,
+            socketId: socket.id,
+            tableId: "",
+            isBot
+        }
+        console.log(`${REDIS_KEY.USER}:${_id}`)
+        await redisSet(`${REDIS_KEY.USER}:${_id}`, JSON.stringify(data))
+        let findNewUser: any = await redisGet(`${data._id}`)
+        findNewUser = JSON.parse(findNewUser)
+        if (data.isBot == false) {
             data = {
                 eventName: EVENT_NAME.SIGN_UP,
                 socket,
                 data: {
                     message: "ok",
-                    data: newUser
+                    data
                 }
             }
-            logger.info(`END : signUp :: DATA OF BOT :: ${JSON.stringify(data.data)}`);
-            return newUser
-        } else {
-            let checkUserIsExistOrNot = await User.findOne({ userName })
-            if (!checkUserIsExistOrNot) {
-                let newUser = await User.create({
-                    userName,
-                    socketId: socket.id,
-                    tableId: "",
-                    isBot: false
-                })
-                data = {
-                    eventName: EVENT_NAME.SIGN_UP,
-                    socket,
-                    data: {
-                        message: "ok",
-                        data: newUser
-                    }
-                }
-                logger.info(`END : signUp :: DATA :: ${JSON.stringify(data.data)}`);
-                sendToSocketIdEmmiter(data);
-                return data.data
-            } else {
-                let updateUser = await User.findByIdAndUpdate(checkUserIsExistOrNot._id, { socketId: socket.id });
-                data = {
-                    eventName: EVENT_NAME.SIGN_UP,
-                    socket,
-                    data: {
-                        message: "ok",
-                        data: updateUser
-                    }
-                }
-                logger.info(`END : signUp :: DATA :: ${JSON.stringify(data.data)}`);
-                return sendToSocketIdEmmiter(data)
-            }
+            sendToSocketIdEmmiter(data);
         }
+        logger.info(`END : signUp :: DATA OF BOT :: ${JSON.stringify(data.data)}`);
+        return findNewUser
     } catch (error) {
         logger.error(`CATCH_ERROR  signUp :: ${JSON.stringify(data)} , ${error}`);
     }
 }
-
 export { signUp }

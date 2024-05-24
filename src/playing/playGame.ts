@@ -8,6 +8,7 @@ import { declareWinner } from "./declareWinner"
 import { changeTurn } from "./changeTurn"
 import { validatePlayGameData } from "../validation/playGameValidation"
 import { cancleTurnTimerJob } from "../bull/cancleQueue/cancleTurnTimerQueue"
+import { redisDel, redisGet, redisSet } from "../redisOption"
 
 const playGame = async (data: any, socket: any) => {
     try {
@@ -24,60 +25,28 @@ const playGame = async (data: any, socket: any) => {
             logger.error(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
             return sendToSocketIdEmmiter(data);
         }
-        await cancleTurnTimerJob(data.tableId.toString())
+
+        let tableId:any = data.tableId
+        console.log("***********>>>", tableId);
+        let canelTimer = await cancleTurnTimerJob(tableId)
+        logger.info("::>>>>>>>>>>", JSON.stringify(canelTimer));
         if (data.sign == "X") {
-            // This is for Play
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "PLAYING" })
+            let findTable: any = await redisGet(`${tableId}`)
+            findTable = JSON.parse(findTable)
+            findTable.gameStatus = "PLAYING"
+            await redisDel(`${findTable._id}`)
+            await redisSet(`${findTable._id}`, JSON.stringify(findTable));
             let parts = data.data.split("-");
             let numberOfBox = parts[1];
-            await Table.findByIdAndUpdate(data.tableId, { [`playingData.${numberOfBox - 1}`]: { userId: data.userId, symbol: data.sign } });
-            const findTableForCheckWinner = await Table.findById(data.tableId)
-            if (findTableForCheckWinner) {
-                let checkWinnerorNot = await checkWinner(findTableForCheckWinner)
-                if (checkWinnerorNot == "X") {
-                    data = {
-                        eventName: EVENT_NAME.PLAY_GAME,
-                        data: {
-                            _id: data.tableId,
-                            userId: data.userId,
-                            symbol: "X",
-                            message: "ok",
-                            winner: true,
-                            cellId: data.data
-                        },
-                        socket
-                    }
-                    sendToRoomEmmiter(data)
-                    data = {
-                        tableId: findTableForCheckWinner._id,
-                        userId: data.data.userId,
-                        symbol: "X",
-                        isLeave: false
-                    }
-                    logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
-                    return await declareWinner(data)
-                } else if (checkWinnerorNot == "TIE") {
-                    data = {
-                        eventName: EVENT_NAME.PLAY_GAME,
-                        data: {
-                            _id: data.tableId,
-                            userId: data.userId,
-                            symbol: "X",
-                            message: "ok",
-                            winner: "TIE",
-                            cellId: data.data
-                        },
-                        socket
-                    }
-                    sendToRoomEmmiter(data)
-                    data = {
-                        tableId: findTableForCheckWinner._id,
-                        userId: data.data.userId,
-                        symbol: "TIE",
-                    }
-                    logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
-                    return await declareWinner(data)
-                }
+            findTable.playingData[numberOfBox - 1] = {
+                userId: data.userId,
+                symbol: data.sign
+            }
+            await redisDel(`${findTable._id}`)
+            await redisSet(`${findTable._id}`, JSON.stringify(findTable));
+
+            let checkWinnerorNot = await checkWinner(findTable)
+            if (checkWinnerorNot == "X") {
                 data = {
                     eventName: EVENT_NAME.PLAY_GAME,
                     data: {
@@ -85,26 +54,76 @@ const playGame = async (data: any, socket: any) => {
                         userId: data.userId,
                         symbol: "X",
                         message: "ok",
-                        winner: false,
+                        winner: true,
                         cellId: data.data
                     },
                     socket
                 }
                 sendToRoomEmmiter(data)
-                logger.info(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
-                return await changeTurn({ tableId: findTableForCheckWinner._id, play: true }, socket)
+                data = {
+                    tableId: findTable._id,
+                    userId: data.data.userId,
+                    symbol: "X",
+                    isLeave: false
+                }
+                logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
+                return await declareWinner(data)
+            } else if (checkWinnerorNot == "TIE") {
+                data = {
+                    eventName: EVENT_NAME.PLAY_GAME,
+                    data: {
+                        _id: data.tableId,
+                        userId: data.userId,
+                        symbol: "X",
+                        message: "ok",
+                        winner: "TIE",
+                        cellId: data.data
+                    },
+                    socket
+                }
+                sendToRoomEmmiter(data)
+                data = {
+                    tableId: findTable._id,
+                    userId: data.data.userId,
+                    symbol: "TIE",
+                }
+                logger.info(`END : playGame :: DATA :: ${JSON.stringify(data)}`);
+                return await declareWinner(data)
             }
+            data = {
+                eventName: EVENT_NAME.PLAY_GAME,
+                data: {
+                    _id: data.tableId,
+                    userId: data.userId,
+                    symbol: "X",
+                    message: "ok",
+                    winner: false,
+                    cellId: data.data
+                },
+                socket
+            }
+            sendToRoomEmmiter(data)
+            logger.info(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
+            return await changeTurn({ tableId: findTable._id, play: true }, socket)
         }
 
         if (data.sign == "O") {
             // This is for Play
-            await Table.findByIdAndUpdate(data.tableId, { gameStatus: "PLAYING" })
+            let findTable: any = await redisGet(`${data.tableId}`)
+            findTable = JSON.parse(findTable)
+            findTable.gameStatus = "PLAYING"
+            await redisDel(`${findTable._id}`)
+            await redisSet(`${findTable._id}`, JSON.stringify(findTable));
             let parts = data.data.split("-");
             let numberOfBox = parts[1];
-            await Table.findByIdAndUpdate(data.tableId, { [`playingData.${numberOfBox - 1}`]: { userId: data.userId, symbol: data.sign } });
-            const findTableForCheckWinner = await Table.findById(data.tableId)
-            if (findTableForCheckWinner) {
-                let checkWinnerorNot = await checkWinner(findTableForCheckWinner)
+            findTable.playingData[numberOfBox - 1] = {
+                userId: data.userId,
+                symbol: data.sign
+            }
+            await redisDel(`${findTable._id}`)
+            await redisSet(`${findTable._id}`, JSON.stringify(findTable));
+            if (findTable) {
+                let checkWinnerorNot = await checkWinner(findTable)
                 if (checkWinnerorNot == "O") {
                     data = {
                         eventName: EVENT_NAME.PLAY_GAME,
@@ -120,7 +139,7 @@ const playGame = async (data: any, socket: any) => {
                     }
                     sendToRoomEmmiter(data)
                     data = {
-                        tableId: findTableForCheckWinner._id,
+                        tableId: findTable._id,
                         userId: data.data.userId,
                         symbol: "O",
                         isLeave: false
@@ -142,7 +161,7 @@ const playGame = async (data: any, socket: any) => {
                     }
                     sendToRoomEmmiter(data)
                     data = {
-                        tableId: findTableForCheckWinner._id,
+                        tableId: findTable._id,
                         userId: data.data.userId,
                         symbol: "TIE",
                     }
@@ -163,7 +182,7 @@ const playGame = async (data: any, socket: any) => {
                 }
                 sendToRoomEmmiter(data)
                 logger.info(`END : playGame :: DATA :: ${JSON.stringify(data.data)}`);
-                return await changeTurn({ tableId: findTableForCheckWinner._id }, socket)
+                return await changeTurn({ tableId: findTable._id }, socket)
             }
         }
     } catch (error) {

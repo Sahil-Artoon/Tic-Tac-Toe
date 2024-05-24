@@ -17,23 +17,12 @@ const connectRedis = async () => {
         redis.connect()
         redis.on("connect", () => {
             logger.info("Redis Connected...");
+            
+                redis.flushDb();
         })
         redis.on('error', (error: any) => {
             logger.error(`CATCH_ERROR connectRedis :: ${error}`);
         });
-        // await redisPub.on("connect", () => {
-        //     logger.info("Redis Pub Connected...");
-        // })
-        // await redisPub.on('error', (error: any) => {
-        //     logger.error(`CATCH_ERROR connectPub :: ${error}`);
-        // });
-
-        // await redisSub.on("connect", () => {
-        //     logger.info("Redis Sub Connected...");
-        // })
-        // await redisSub.on('error', (error: any) => {
-        //     logger.error(`CATCH_ERROR connectSub :: ${error}`);
-        // });
     } catch (error) {
         logger.error(`CATCH_ERROR connectRedis :: ${error}`);
     }

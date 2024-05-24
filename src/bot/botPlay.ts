@@ -2,14 +2,15 @@ import { findRandomNumber } from "../common/findRandomNumber";
 import { logger } from "../logger";
 import { Table } from "../model/tableModel";
 import { playGame } from "../playing/playGame";
+import { redisGet } from "../redisOption";
 
 const botPlay = async (data: any, socket: any) => {
     try {
         logger.info(`START : botPlay :: DATA :: ${JSON.stringify(data)}`)
-        let findTable = await Table.findById(data)
+        let findTable: any = await redisGet(`${data}`)
+        findTable = JSON.parse(findTable)
         if (findTable) {
             let numberOfCell: number;
-            let check = false
             do {
                 numberOfCell = findRandomNumber()
             } while (findTable.playingData[numberOfCell - 1].symbol != "")

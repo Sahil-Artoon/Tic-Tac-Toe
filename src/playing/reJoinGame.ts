@@ -9,6 +9,7 @@ import { getJob } from "../bull/getQueue/getRoundTimerQueue";
 import { validateRejoinData } from "../validation/rejoinValidation";
 import { getTurnTimerQueue } from "../bull/getQueue/getTurnTimerQueue";
 import { TIMER } from "../constant/timerConstant";
+import { redisDel, redisGet, redisSet } from "../redisOption";
 
 const reJoinGame = async (data: any, socket: any) => {
     try {
@@ -25,14 +26,19 @@ const reJoinGame = async (data: any, socket: any) => {
             logger.error(`END : reJoinGame :: DATA :: ${JSON.stringify(data.data)}`);
             return sendToSocketIdEmmiter(data);
         }
-        let findTable = await Table.findById(data.tableId)
+        let findTable: any = await redisGet(`${data.tableId}`)
+        findTable = JSON.parse(findTable)
         if (findTable) {
             if (findTable.playerInfo.length == 1) {
                 if (findTable.playerInfo[0].userId == data.userData.userId) {
-                    await User.findByIdAndUpdate(findTable.playerInfo[0].userId, { socketId: socket.id, tableId: findTable._id.toString() });
-                    await Table.findByIdAndUpdate(findTable._id, { $set: { 'playerInfo[0].socketId': socket.id } })
+                    let findUser: any = await redisGet(`${findTable.playerInfo[0].userId}`)
+                    findUser = JSON.parse(findUser)
+                    findUser.socketId = socket.id
+                    findUser.tableId = findTable._id
+                    await redisDel(`${findUser._id}`)
+                    await redisSet(`${findUser._id}`, JSON.stringify(findUser))
                 }
-                socket.join(findTable._id.toString())
+                socket.join(findTable._id)
                 if (findTable.gameStatus == "WATING") {
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
@@ -49,12 +55,22 @@ const reJoinGame = async (data: any, socket: any) => {
             }
             if (findTable.playerInfo.length == 2) {
                 if (findTable.playerInfo[0].userId == data.userData.userId) {
-                    await User.findByIdAndUpdate(findTable.playerInfo[0].userId, { socketId: socket.id, tableId: findTable._id.toString() })
+                    let findUser: any = await redisGet(`${findTable.playerInfo[0].userId}`)
+                    findUser = JSON.parse(findUser)
+                    findUser.socketId = socket.id
+                    findUser.tableId = findTable._id
+                    await redisDel(`${findUser._id}`)
+                    await redisSet(`${findUser._id}`, JSON.stringify(findUser))
                 }
                 if (findTable.playerInfo[1].userId == data.userData.userId) {
-                    await User.findByIdAndUpdate(findTable.playerInfo[1].userId, { socketId: socket.id, tableId: findTable._id.toString() })
+                    let findUser: any = await redisGet(`${findTable.playerInfo[1].userId}`)
+                    findUser = JSON.parse(findUser)
+                    findUser.socketId = socket.id
+                    findUser.tableId = findTable._id
+                    await redisDel(`${findUser._id}`)
+                    await redisSet(`${findUser._id}`, JSON.stringify(findUser))
                 }
-                socket.join(findTable._id.toString())
+                socket.join(findTable._id)
                 if (findTable.gameStatus == "WATING") {
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
@@ -69,7 +85,7 @@ const reJoinGame = async (data: any, socket: any) => {
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "ROUND_TIMER_START") {
-                    const getpanddingTime: any = await getJob(findTable._id.toString())
+                    const getpanddingTime: any = await getJob(findTable._id)
                     if (getpanddingTime > 5) {
                         data = {
                             eventName: EVENT_NAME.REJOIN_GAME,
@@ -101,7 +117,7 @@ const reJoinGame = async (data: any, socket: any) => {
                     }
                 }
                 if (findTable.gameStatus == "LOCK") {
-                    let getpanddingTime: any = await getJob(findTable._id.toString())
+                    let getpanddingTime: any = await getJob(findTable._id)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
@@ -117,7 +133,7 @@ const reJoinGame = async (data: any, socket: any) => {
                     return sendToSocketIdEmmiter(data)
                 }
                 if (findTable.gameStatus == "CHECK_TURN") {
-                    let getpanddingTime: any = await getTurnTimerQueue(findTable._id.toString())
+                    let getpanddingTime: any = await getTurnTimerQueue(findTable._id)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {
@@ -135,7 +151,7 @@ const reJoinGame = async (data: any, socket: any) => {
                 }
 
                 if (findTable.gameStatus == "PLAYING") {
-                    let getpanddingTime: any = await getTurnTimerQueue(findTable._id.toString())
+                    let getpanddingTime: any = await getTurnTimerQueue(findTable._id)
                     data = {
                         eventName: EVENT_NAME.REJOIN_GAME,
                         data: {

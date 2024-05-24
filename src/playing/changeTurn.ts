@@ -8,108 +8,109 @@ import { TIMER } from "../constant/timerConstant";
 import { declareWinner } from "./declareWinner";
 import { botPlay } from "../bot/botPlay";
 import { User } from "../model/userModel";
+import { redisDel, redisGet, redisSet } from "../redisOption";
 
 const changeTurn = async (data: any, socket: any) => {
     try {
         logger.info(`START FUNCTION : changeTurn :: DATA :: ${JSON.stringify(data)}`);
-        let findTable = await Table.findById(data.tableId)
-        if (findTable) {
-            if (findTable.currentTurnSeatIndex == 0) {
+        let finalTable: any = await redisGet(`${data.tableId}`)
+        finalTable = JSON.parse(finalTable)
+        console.log("change turn table :::: ", finalTable);
+        if (finalTable) {
+            if (finalTable.currentTurnSeatIndex == 0) {
+                let findTable: any = await redisGet(`${finalTable._id}`)
+                findTable = JSON.parse(findTable)
                 if (data.play == false) {
-                    let checkData = await Table.findByIdAndUpdate(findTable._id, { $inc: { [`playerInfo.${0}.turnMiss`]: 1 } }, { new: true })
-                    if (checkData?.playerInfo[0]?.turnMiss == 3) {
+                    findTable.playerInfo[0].turnMiss = findTable.playerInfo[0].turnMiss + 1
+                    await redisDel(`${findTable._id}`)
+                    await redisSet(`${findTable._id}`, JSON.stringify(findTable));
+                    console.log("==============>>", findTable);
+                    console.log("----------------------->>>>>>>>", findTable?.playerInfo[0]?.turnMiss)
+                    if (findTable?.playerInfo[0]?.turnMiss == 3) {
                         data = {
-                            tableId: checkData?._id.toString(),
-                            userId: checkData?.playerInfo[1].userId,
-                            symbol: checkData?.playerInfo[1].symbol,
+                            tableId: findTable?._id,
+                            userId: findTable?.playerInfo[1].userId,
+                            symbol: findTable?.playerInfo[1].symbol,
                             isLeave: false
                         }
                         logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);
                         return declareWinner(data)
                     }
                 }
-                let updateTable = await Table.findByIdAndUpdate(findTable._id, {
-                    currentTurnSeatIndex: "1",
-                    currentTurnUserId: findTable.playerInfo[1].userId,
-                    gameStatus: "PLAYING",
-                }, { new: true })
+                findTable.currentTurnSeatIndex = 1
+                findTable.currentTurnUserId = findTable.playerInfo[1].userId
+                findTable.gameStatus = "PLAYING"
+                await redisDel(`${findTable._id}`)
+                await redisSet(`${findTable._id}`, JSON.stringify(findTable));
                 data = {
                     eventName: EVENT_NAME.CHANGE_TURN,
                     data: {
-                        _id: updateTable?._id.toString(),
-                        data: updateTable?.playerInfo[1],
-                        userId: updateTable?.playerInfo[1].userId,
-                        symbol: updateTable?.playerInfo[1].symbol,
-                        time: TIMER.TURN_TIMER
+                        _id: findTable?._id,
+                        data: findTable?.playerInfo[1],
+                        userId: findTable?.playerInfo[1].userId,
+                        symbol: findTable?.playerInfo[1].symbol,
+                        time: TIMER.TURN_TIMER,
+                        seatIndex: findTable?.currentTurnSeatIndex
                     }
                 }
+
+                console.log("changeTurn ::: data send :::: ---->    ", data)
+
                 sendToRoomEmmiter(data)
-                let result = await cancleTurnTimerJob(updateTable?._id.toString())
-                if (result == true) {
-                    data = {
-                        tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER
-                    }
-                    await turnTimer(data, socket)
+
+                data = {
+                    tableId: findTable?._id,
+                    time: TIMER.TURN_TIMER
                 }
-                else {
-                    data = {
-                        tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER
-                    }
-                    await turnTimer(data, socket)
-                }
-                let findUser = await User.findById(updateTable?.playerInfo[1].userId)
+                await turnTimer(data, socket)
+                let findUser: any = await redisGet(`${findTable?.playerInfo[1].userId}`)
+                findUser = JSON.parse(findUser)
                 if (findUser?.isBot == true) {
-                    await botPlay(data.tableId, socket)
+                    await botPlay(findTable._id, socket)
                 }
             }
-            if (findTable.currentTurnSeatIndex == 1) {
+            if (finalTable.currentTurnSeatIndex == 1) {
+                let findTable: any = await redisGet(`${finalTable._id}`)
+                findTable = JSON.parse(findTable)
                 if (data.play == false) {
-                    let checkData = await Table.findByIdAndUpdate(findTable._id, { $inc: { [`playerInfo.${1}.turnMiss`]: 1 } }, { new: true })
-                    if (checkData?.playerInfo[1]?.turnMiss == 3) {
+                    findTable.playerInfo[1].turnMiss = findTable.playerInfo[1].turnMiss + 1
+                    await redisDel(`${findTable._id}`)
+                    await redisSet(`${findTable._id}`, JSON.stringify(findTable))
+                    if (findTable?.playerInfo[1]?.turnMiss == 3) {
                         data = {
-                            tableId: checkData?._id.toString(),
-                            userId: checkData?.playerInfo[0].userId,
-                            symbol: checkData?.playerInfo[0].symbol,
+                            tableId: findTable?._id,
+                            userId: findTable?.playerInfo[0].userId,
+                            symbol: findTable?.playerInfo[0].symbol,
                             isLeave: false
                         }
                         logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);
                         return declareWinner(data)
                     }
                 }
-                let updateTable = await Table.findByIdAndUpdate(findTable._id, {
-                    currentTurnSeatIndex: "0",
-                    currentTurnUserId: findTable.playerInfo[0].userId,
-                    gameStatus: "PLAYING",
-                }, { new: true })
+                findTable.currentTurnSeatIndex = 0
+                findTable.currentTurnUserId = findTable.playerInfo[0].userId
+                findTable.gameStatus = "PLAYING"
+                await redisDel(`${findTable._id}`)
+                await redisSet(`${findTable._id}`, JSON.stringify(findTable));
                 data = {
                     eventName: EVENT_NAME.CHANGE_TURN,
                     data: {
-                        _id: updateTable?._id.toString(),
-                        data: updateTable?.playerInfo[0],
-                        userId: updateTable?.playerInfo[0].userId,
-                        symbol: updateTable?.playerInfo[0].symbol,
-                        time: TIMER.TURN_TIMER
+                        _id: findTable?._id,
+                        data: findTable?.playerInfo[0],
+                        userId: findTable?.playerInfo[0].userId,
+                        symbol: findTable?.playerInfo[0].symbol,
+                        time: TIMER.TURN_TIMER,
+                        seatIndex: findTable?.currentTurnSeatIndex
                     }
                 }
                 sendToRoomEmmiter(data)
-                let result = await cancleTurnTimerJob(updateTable?._id.toString())
-                if (result == true) {
-                    data = {
-                        tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER
-                    }
-                    await turnTimer(data, socket)
+                data = {
+                    tableId: findTable?._id,
+                    time: TIMER.TURN_TIMER
                 }
-                else {
-                    data = {
-                        tableId: updateTable?._id.toString(),
-                        time: TIMER.TURN_TIMER
-                    }
-                    await turnTimer(data, socket)
-                }
-                let findUser = await User.findById(updateTable?.playerInfo[0].userId)
+                await turnTimer(data, socket)
+                let findUser: any = await redisGet(`${findTable?.playerInfo[0].userId}`)
+                findUser = JSON.parse(findUser)
                 if (findUser?.isBot == true) {
                     await botPlay(data.tableId, socket)
                 }
@@ -117,7 +118,7 @@ const changeTurn = async (data: any, socket: any) => {
             logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);
         }
     } catch (error) {
-        logger.error(`CATCH_ERROR  changeTurn :: ${data} , ${error}`);
+        logger.error(`CATCH_ERROR  changeTurn :: ${data}, ${error}`);
     }
 }
 

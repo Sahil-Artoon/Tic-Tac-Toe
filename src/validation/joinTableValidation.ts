@@ -5,7 +5,7 @@ const validateJoinTable = async (data: any) => {
     try {
         logger.info(`START : validateJoinTable :: DATA :: ${JSON.stringify(data)}`);
         const schema = Joi.object({
-            userId: Joi.string().alphanum().min(3).max(30).required(),
+            userId: Joi.string().required(),
         });
 
         const validationResult = schema.validate(data);

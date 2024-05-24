@@ -9,14 +9,14 @@ const roundTimer = async (data: any, socket: any) => {
         const tableId: any = data.tableId
         let roundTimerQueue = new Queue(QUEUE_EVENT.ROUND_TIMER, redisOption);
         let options = {
-            jobId: tableId.toString(),
+            jobId: tableId,
             delay: data.time,
             attempts: 1
         }
         roundTimerQueue.add(data, options)
         roundTimerQueue.process(async (data: any) => {
             data = {
-                tableId: data.data.tableId.toString(),
+                tableId: data.data.tableId,
             }
             await setTimeout(() => {
                 checkTurn(data, socket)
