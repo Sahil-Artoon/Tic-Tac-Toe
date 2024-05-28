@@ -8,12 +8,13 @@ import { redisGet, redisSet } from "../../redisOption";
 
 const leaveButton = async (data: any) => {
     try {
+        logger.info(`START leaveButton :::: ${JSON.stringify(data)}`)
         const tableId: any = data.tableId
         let roundTimerQueue = new Queue(QUEUE_EVENT.LEAVE_BUTTON, redisOption);
         let options = {
             jobId: tableId,
             delay: data.time,
-            attempts: 1
+            removeOnComplete: true
         }
         roundTimerQueue.add(data, options)
         roundTimerQueue.process(async (data: any) => {

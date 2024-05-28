@@ -10,7 +10,7 @@ const botSignUp = async (socket: any) => {
             userName: "bot",
             isBot: true
         }
-        let dataOfBot: any = signUp(data, socket)
+        let dataOfBot: any = await signUp(data, socket)
         return dataOfBot
     } catch (error) {
         logger.error(`CATCH_ERROR createBot :: ${error}`);

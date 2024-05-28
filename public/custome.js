@@ -235,11 +235,6 @@ const printValue = (data) => {
 }
 const changeTurn = (data) => {
     console.log(`Data of changeTurn is ::: ${JSON.stringify(data)}`)
-    console.log(":::::::::::::::::::::::::::::::")
-    console.log(`Data of changeTurn is :::`, data)
-    console.log("UserId is ::::", userId)
-    console.log(":::::::::::::::::::::::::::::::")
-
     if (data.data.symbol == symbol) {
         enableBoard()
         document.getElementById('winner').innerHTML = "It's your Turn.";

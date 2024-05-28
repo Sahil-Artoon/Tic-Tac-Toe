@@ -23,6 +23,8 @@ const changeTurn = async (data: any, socket: any) => {
                     findTable.playerInfo[0].turnMiss = findTable.playerInfo[0].turnMiss + 1
                     await redisDel(`${findTable._id}`)
                     await redisSet(`${findTable._id}`, JSON.stringify(findTable));
+                    findTable = await redisGet(`${findTable._id}`)
+                    findTable = JSON.parse(findTable)
                     if (findTable?.playerInfo[0]?.turnMiss == 3) {
                         data = {
                             tableId: findTable?._id,
@@ -51,12 +53,21 @@ const changeTurn = async (data: any, socket: any) => {
                     }
                 }
                 sendToRoomEmmiter(data)
-
-                data = {
-                    tableId: findTable?._id,
-                    time: TIMER.TURN_TIMER
+                let result = await cancleTurnTimerJob(findTable?._id)
+                if (result == true) {
+                    data = {
+                        tableId: findTable?._id,
+                        time: TIMER.TURN_TIMER
+                    }
+                    await turnTimer(data, socket)
                 }
-                await turnTimer(data, socket)
+                else {
+                    data = {
+                        tableId: findTable?._id,
+                        time: TIMER.TURN_TIMER
+                    }
+                    await turnTimer(data, socket)
+                }
                 let findUser: any = await redisGet(`${findTable?.playerInfo[1].userId}`)
                 findUser = JSON.parse(findUser)
                 if (findUser?.isBot == true) {
@@ -70,6 +81,8 @@ const changeTurn = async (data: any, socket: any) => {
                     findTable.playerInfo[1].turnMiss = findTable.playerInfo[1].turnMiss + 1
                     await redisDel(`${findTable._id}`)
                     await redisSet(`${findTable._id}`, JSON.stringify(findTable))
+                    findTable = await redisGet(`${findTable._id}`)
+                    findTable = JSON.parse(findTable)
                     if (findTable?.playerInfo[1]?.turnMiss == 3) {
                         data = {
                             tableId: findTable?._id,
@@ -98,15 +111,25 @@ const changeTurn = async (data: any, socket: any) => {
                     }
                 }
                 sendToRoomEmmiter(data)
-                data = {
-                    tableId: findTable?._id,
-                    time: TIMER.TURN_TIMER
+                let result = await cancleTurnTimerJob(findTable?._id)
+                if (result == true) {
+                    data = {
+                        tableId: findTable?._id,
+                        time: TIMER.TURN_TIMER
+                    }
+                    await turnTimer(data, socket)
                 }
-                await turnTimer(data, socket)
+                else {
+                    data = {
+                        tableId: findTable?._id,
+                        time: TIMER.TURN_TIMER
+                    }
+                    await turnTimer(data, socket)
+                }
                 let findUser: any = await redisGet(`${findTable?.playerInfo[0].userId}`)
                 findUser = JSON.parse(findUser)
                 if (findUser?.isBot == true) {
-                    await botPlay(data.tableId, socket)
+                    await botPlay(findTable._id, socket)
                 }
             }
             logger.info(`END : changeTurn :: DATA :: ${JSON.stringify(data)}`);

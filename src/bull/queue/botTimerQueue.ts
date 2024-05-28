@@ -7,15 +7,19 @@ import { joinBotInTable } from "../../bot/joinBotInTable";
 
 const addBotQueue = (data: any, socket: any) => {
     try {
+        logger.info(`START addBotQueue :::: ${JSON.stringify(data)}`)
         let reStartQueue = new Queue(QUEUE_EVENT.BOT_TIMER, redisOption);
         let options = {
             jobId: data._id,
             delay: data.time,
-            attempts: 1
+            removeOnComplete: true
         }
         reStartQueue.add(data, options)
         reStartQueue.process(async (data: any) => {
-            let dataOfBot = await botSignUp(socket);
+            let dataOfBot: any = await botSignUp(socket);
+            console.log(":::::::::::::::::::::::")
+            console.log(dataOfBot)
+            console.log(":::::::::::::::::::::::")
             if (dataOfBot) {
                 data = {
                     userId: dataOfBot?._id

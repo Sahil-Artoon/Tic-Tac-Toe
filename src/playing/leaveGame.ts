@@ -13,6 +13,7 @@ import { redisDel, redisGet, redisSet } from '../redisOption';
 import { REDIS_KEY } from '../constant/redisKey';
 import { TIMER } from '../constant/timerConstant';
 import { addBotQueue } from '../bull/queue/botTimerQueue';
+import { cancleBotTimer } from '../bull/cancleQueue/cancleBotQueue';
 const leaveGame = async (data: any, socket: any) => {
     try {
         logger.info(`START FUNCTION : leaveGame :: DATA :: ${JSON.stringify(data)}`);
@@ -32,6 +33,7 @@ const leaveGame = async (data: any, socket: any) => {
         findTable = JSON.parse(findTable)
         if (findTable) {
             if (findTable.gameStatus == "WATING") {
+                await cancleBotTimer(`${findTable._id}`)
                 await redisDel(`${findTable._id}`)
                 await redisDel(`${data.userData.userData.userId}`)
                 await redisDel(`${REDIS_KEY.QUEUE}`)
@@ -51,9 +53,17 @@ const leaveGame = async (data: any, socket: any) => {
                 if (findTable.playerInfo[0].userId == data.userData.userData.userId) {
                     let check = await getCancleJob(findTable._id)
                     if (check == true) {
-                        findTable.playerInfo = findTable.playerInfo.splice(0, 1)
+                        findTable.playerInfo = findTable.playerInfo.splice(1, 1)
                         findTable.activePlayer = findTable.activePlayer - 1
                         findTable.gameStatus = "WATING"
+
+                        await redisDel(`${findTable._id}`)
+                        await redisSet(`${findTable._id}`, JSON.stringify(findTable))
+                        findTable = await redisGet(`${findTable._id}`)
+                        findTable = JSON.parse(findTable)
+                        console.log(":::::::::::::: This is LeaveGame ::::::::::::::::")
+                        console.log(findTable)
+                        console.log(":::::::::::::::::::::::::::::::::::::")
                         let findUser: any = await redisGet(`${data.userData.userData.userId}`)
                         findUser = JSON.parse(findUser)
                         findUser.tableId = ""
@@ -82,21 +92,29 @@ const leaveGame = async (data: any, socket: any) => {
                             },
                             socket
                         }
+                        sendToRoomEmmiter(data)
                         data = {
                             _id: findTable._id,
                             time: TIMER.BOT_TIMER
                         }
-                        await addBotQueue(data, socket)
+                        addBotQueue(data, socket)
                         logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data.data)}`);
-                        return sendToRoomEmmiter(data)
+                        return 0
                     }
                 }
                 if (findTable.playerInfo[1].userId == data.userData.userData.userId) {
                     let check = await getCancleJob(findTable._id)
                     if (check == true) {
-                        findTable.playerInfo = findTable.playerInfo.splice(1, 1)
+                        findTable.playerInfo = findTable.playerInfo.splice(0, 1)
                         findTable.activePlayer = findTable.activePlayer - 1
                         findTable.gameStatus = "WATING"
+                        await redisDel(`${findTable._id}`)
+                        await redisSet(`${findTable._id}`, JSON.stringify(findTable))
+                        findTable = await redisGet(`${findTable._id}`)
+                        findTable = JSON.parse(findTable)
+                        console.log(":::::::::::::: This is LeaveGame ::::::::::::::::")
+                        console.log(findTable)
+                        console.log(":::::::::::::::::::::::::::::::::::::")
                         let findUser: any = await redisGet(`${data.userData.userData.userId}`)
                         findUser = JSON.parse(findUser)
                         findUser.tableId = ""
@@ -125,8 +143,14 @@ const leaveGame = async (data: any, socket: any) => {
                             },
                             socket
                         }
+                        sendToRoomEmmiter(data)
+                        data = {
+                            _id: findTable._id,
+                            time: TIMER.BOT_TIMER
+                        }
+                        addBotQueue(data, socket)
                         logger.info(`END : leaveGame :: DATA :: ${JSON.stringify(data.data)}`);
-                        return sendToRoomEmmiter(data)
+                        return 0
                     }
                 }
             }
@@ -178,7 +202,7 @@ const leaveGame = async (data: any, socket: any) => {
             }
         }
     } catch (error) {
-        logger.error(`CATCH_ERROR  leaveGame :: ${data} , ${error}`);
+        logger.error(`CATCH_ERROR  leaveGame :: ${data}, ${error}`);
     }
 }
 

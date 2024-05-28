@@ -7,12 +7,13 @@ import { changeTurn } from "../../playing/changeTurn";
 
 const turnTimer = async (data: any, socket: any) => {
     try {
+        logger.info(`START turnTimer :::: ${JSON.stringify(data)}`)
         const tableId: any = data.tableId
         let roundTimerQueue = new Queue(QUEUE_EVENT.TURN_TIMER, redisOption);
         let options = {
             jobId: data.tableId,
             delay: data.time,
-            attempts: 1
+            removeOnComplete: true
         }
         roundTimerQueue.add(data, options)
         roundTimerQueue.process(async (data: any) => {

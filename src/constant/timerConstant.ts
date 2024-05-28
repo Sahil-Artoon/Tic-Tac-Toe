@@ -1,6 +1,7 @@
 const TIMER = {
     TURN_TIMER:10000,
     BOT_TIMER:5000,
+    BOT_PLAY_TIMER:2000
 }
 
 export {TIMER}

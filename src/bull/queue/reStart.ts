@@ -7,11 +7,12 @@ import { sendToRoomEmmiter } from "../../eventEmmitter";
 
 const reStart = (data: any) => {
     try {
+        logger.info(`START reStart :::: ${JSON.stringify(data)}`)
         let reStartQueue = new Queue(QUEUE_EVENT.RE_START, redisOption);
         let options = {
             jobId: data._id,
             delay: data.timer,
-            attempts: 1
+            removeOnComplete: true
         }
         reStartQueue.add(data, options)
         reStartQueue.process((data: any) => {
@@ -24,7 +25,7 @@ const reStart = (data: any) => {
             sendToRoomEmmiter(data)
         })
     } catch (error) {
-        logger.error("Queue RoundTimer Error :::", error)
+        logger.error("Queue reStart Error :::", error)
     }
 }
 

@@ -49,13 +49,6 @@ const checkTurn = async (data: any, socket: any) => {
                 botPlay(dataOfTable?._id, socket)
             }
         }
-        if (ramdomNumberForGiveUserTurn == 0) {
-            let findUser: any = await redisGet(`${dataOfTable?.playerInfo[0].userId}`)
-            findUser = JSON.parse(findUser)
-            if (findUser?.isBot == true) {
-                botPlay(dataOfTable?._id, socket)
-            }
-        }
         logger.info(`END : checkTurn :: DATA :: ${JSON.stringify(data)}`);
     } catch (error) {
         logger.error(`CATCH_ERROR  checkTurn :: ${data} , ${error}`);

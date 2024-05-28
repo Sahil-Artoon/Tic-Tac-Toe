@@ -110,33 +110,29 @@ const joinGame = async (data: any, socket: any) => {
                 await redisSet(`${findTable._id}`, JSON.stringify(findTable))
                 let currentTable: any = await redisGet(`${findTable._id}`)
                 currentTable = JSON.parse(currentTable)
-                if (currentTable) {
-                    console.log("currentTable._id is ::::", currentTable._id)
-                    socket.join(currentTable._id)
-                    data = {
-                        eventName: EVENT_NAME.ROUND_TIMER,
-                        data: {
-                            _id: currentTable._id,
-                            data: currentTable,
-                            message: "ok",
-                            roundTimer: 10
-                        },
-                        socket
-                    }
-                    sendToRoomEmmiter(data)
-                    data = {
-                        tableId: currentTable._id,
-                        time: 6000
-                    }
-                    leaveButton(data)
-                    data = {
-                        tableId: currentTable._id,
-                        time: 10000
-                    }
-                    await roundTimer(data, socket)
+                console.log("currentTable._id is ::::", currentTable._id)
+                socket.join(currentTable._id)
+                data = {
+                    eventName: EVENT_NAME.ROUND_TIMER,
+                    data: {
+                        _id: currentTable._id,
+                        data: currentTable,
+                        message: "ok",
+                        roundTimer: 10
+                    },
+                    socket
                 }
-
-
+                sendToRoomEmmiter(data)
+                data = {
+                    tableId: currentTable._id,
+                    time: 6000
+                }
+                leaveButton(data)
+                data = {
+                    tableId: currentTable._id,
+                    time: 10000
+                }
+                roundTimer(data, socket)
             }
         } else {
             let findUser: any = await redisGet(`${userId}`)

@@ -4,6 +4,7 @@ const QUEUE_EVENT = {
     LEAVE_BUTTON: "LEAVE_BUTTON",
     TURN_TIMER: "TURN_TIMER",
     BOT_TIMER: "BOT_TIMER",
+    PLAY_BOT: "PLAY_BOT",
 }
 
 export { QUEUE_EVENT }
